@@ -1,671 +1,263 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Assignment Tool</title>
-    <style>
-        /* Modern CSS Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Divider</title>
+  <style>
+    /* General styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 1rem;
-        }
+    /* Form section styling */
+    .form-section {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="number"], textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    #fileInput {
+      margin-top: 5px;
+    }
+    #nameCount {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #validationMessages {
+      color: red;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #generateBtn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #generateBtn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+    /* Output section styling */
+    .output-section {
+      margin-top: 20px;
+    }
+    .team-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .team {
+      flex: 1 1 180px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+    .team h2 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .team ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .team li {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
 
-        .header {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .main-content {
-            padding: 2rem;
-        }
-
-        /* Input Section Styles */
-        .input-section {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group label {
-            display: block;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .input-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        input[type="number"], textarea, input[type="file"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-        }
-
-        input[type="number"]:focus, textarea:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-            font-family: 'Consolas', 'Monaco', monospace;
-        }
-
-        /* Button Styles */
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 1.5rem;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4b5563;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-            transform: translateY(-2px);
-        }
-
-        /* Output Section Styles */
-        .output-section {
-            margin-top: 2rem;
-            display: none;
-        }
-
-        .output-section.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .output-tabs {
-            display: flex;
-            border-bottom: 2px solid #e5e7eb;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-button {
-            padding: 1rem 1.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #6b7280;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .tab-button.active {
-            color: #4f46e5;
-            border-bottom-color: #4f46e5;
-            background: #f3f4f6;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Visual Grid Styles */
-        .visual-grid {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .team-card {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .team-header {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            padding: 0.5rem;
-            border-radius: 4px;
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        .team-members {
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-
-        .member-name {
-            padding: 0.2rem 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .member-name:last-child {
-            border-bottom: none;
-        }
-
-        /* Text Output Styles */
-        .text-output {
-            background: #1f2937;
-            color: #f9fafb;
-            padding: 1.5rem;
-            border-radius: 8px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 1rem;
-        }
-
-        /* Instructions Styles */
-        .instructions {
-            background: #fffbeb;
-            border: 1px solid #fbbf24;
-            border-radius: 6px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-
-        .instructions h4 {
-            color: #92400e;
-            margin-bottom: 0.5rem;
-        }
-
-        .instructions ol {
-            color: #92400e;
-            margin-left: 1.2rem;
-        }
-
-        /* Error and Success Messages */
-        .message {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-
-        .error {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-        }
-
-        .success {
-            background: #f0fdf4;
-            color: #16a34a;
-            border: 1px solid #bbf7d0;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                margin: 0;
-                border-radius: 0;
-                min-height: 100vh;
-            }
-
-            .header {
-                padding: 1.5rem 1rem;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .input-row {
-                grid-template-columns: 1fr;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .output-tabs {
-                flex-direction: column;
-            }
-
-            .tab-button {
-                text-align: center;
-            }
-        }
-
-        /* Grid responsive calculation */
-        .visual-grid {
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        }
-
-        @media (min-width: 1024px) {
-            .visual-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .visual-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      .team {
+        flex-basis: 100%;
+      }
+      #generateBtn {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎯 Team Assignment Tool</h1>
-            <p>Bagi anggota ke tim secara otomatis dan seimbang</p>
-        </div>
-
-        <div class="main-content">
-            <!-- Input Section -->
-            <div class="input-section">
-                <div class="input-row">
-                    <div class="input-group">
-                        <label for="teamCount">Jumlah Tim</label>
-                        <input type="number" id="teamCount" value="3" min="1" max="20">
-                    </div>
-                    <div class="input-group">
-                        <label for="membersPerTeam">Anggota per Tim</label>
-                        <input type="number" id="membersPerTeam" value="6" min="1" max="15">
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="namesList">Daftar Nama (satu nama per baris)</label>
-                    <textarea id="namesList" placeholder="Masukkan nama-nama di sini...
-Contoh:
-1. Ahmad Rifa’i
-2. Siti Nurhaliza
-3. Budi Santoso
-..."></textarea>
-                </div>
-
-                <div class="input-group">
-                    <label for="fileInput">Atau Upload File (.txt)</label>
-                    <input type="file" id="fileInput" accept=".txt,.json">
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="generateTeams()">🚀 Generate Teams</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">🧹 Clear All</button>
-                </div>
-            </div>
-
-            <div id="messageArea"></div>
-
-            <!-- Output Section -->
-            <div class="output-section" id="outputSection">
-                <div class="output-tabs">
-                    <button class="tab-button active" onclick="switchTab('visual')">📋 Visual Grid</button>
-                    <button class="tab-button" onclick="switchTab('text')">📝 Text Copy</button>
-                </div>
-                <div class="tab-content active" id="visualTab">
-                    <div class="visual-grid" id="visualGrid"></div>
-                </div>
-                <div class="tab-content" id="textTab">
-                    <div class="text-output" id="textOutput"></div>
-                    <div class="button-group">
-                        <button class="btn btn-success" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
-                        <button class="btn btn-secondary" onclick="exportResults('txt')">💾 Export TXT</button>
-                        <button class="btn btn-secondary" onclick="exportResults('json')">💾 Export JSON</button>
-                    </div>
-                    <div class="instructions">
-                        <h4>📋 Cara Salin ke Excel:</h4>
-                        <ol>
-                            <li>Klik "Copy to Clipboard"</li>
-                            <li>Buka Excel → Paste (Ctrl + V)</li>
-                            <li>Pilih font <strong>Consolas</strong> agar susunan rapi</li>
-                            <li>Gunakan <em>Text to Columns</em> jika perlu pemisahan kolom</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <h1>Team Divider</h1>
+    <div class="form-section">
+      <label for="membersPerTeam">Anggota per tim:</label>
+      <input type="number" id="membersPerTeam" value="6" min="1">
+      <label for="names">Daftar nama (satu per baris):</label>
+      <textarea id="names" rows="10" placeholder="Contoh:\nNama1\nNama2\nNama3"></textarea>
+      <label for="fileInput">Atau unggah file .txt:</label>
+      <input type="file" id="fileInput" accept=".txt">
+      <p id="nameCount">Jumlah nama terdeteksi: 0</p>
+      <div id="validationMessages"></div>
+      <button id="generateBtn" disabled>Generate</button>
     </div>
+    <div id="output" class="output-section"></div>
+  </div>
 
-    <script>
-        let currentTeams = [];
-        let totalNamesProcessed = 0;
+  <script>
+    // Element references
+    const membersPerTeamInput = document.getElementById('membersPerTeam');
+    const namesTextarea = document.getElementById('names');
+    const fileInput = document.getElementById('fileInput');
+    const nameCountP = document.getElementById('nameCount');
+    const validationMessagesDiv = document.getElementById('validationMessages');
+    const generateBtn = document.getElementById('generateBtn');
+    const outputDiv = document.getElementById('output');
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const content = e.target.result;
-                    if (file.name.endsWith('.json')) {
-                        const data = JSON.parse(content);
-                        if (data.teams && Array.isArray(data.teams)) {
-                            importTeamData(data);
-                            return;
-                        }
-                    }
-                    document.getElementById('namesList').value = content.trim();
-                    showMessage('File berhasil dimuat! Klik Generate untuk membuat tim.', 'success');
-                } catch (error) {
-                    showMessage('Error reading file: ' + error.message, 'error');
-                }
-            };
-            reader.readAsText(file);
+    // Handle file upload
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          namesTextarea.value = e.target.result;
+          updateValidation();
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    // Update validation on textarea input
+    namesTextarea.addEventListener('input', updateValidation);
+
+    // Extract and clean names from textarea
+    function getNames() {
+      return namesTextarea.value
+        .split('\n')
+        .map(name => name.trim())
+        .filter(name => name !== '');
+    }
+
+    // Validate names and update UI
+    function updateValidation() {
+      const names = getNames();
+      const totalNames = names.length;
+      nameCountP.textContent = `Jumlah nama terdeteksi: ${totalNames}`;
+      validationMessagesDiv.innerHTML = '';
+      let errors = [];
+
+      if (totalNames === 0) {
+        errors.push('Masukkan setidaknya satu nama.');
+      } else {
+        const nameCounts = {};
+        names.forEach(name => {
+          nameCounts[name] = (nameCounts[name] || 0) + 1;
         });
-
-        function importTeamData(data) {
-            currentTeams = data.teams;
-            totalNamesProcessed = currentTeams.reduce((sum, t) => sum + t.members.length, 0);
-            document.getElementById('teamCount').value = currentTeams.length;
-            if (currentTeams.length > 0) {
-                document.getElementById('membersPerTeam').value =
-                    Math.max(...currentTeams.map(t => t.members.length));
-            }
-            const allNames = currentTeams.flatMap(team => team.members);
-            document.getElementById('namesList').value = allNames.join('\n');
-            displayResults();
-            showMessage(`Berhasil import ${currentTeams.length} tim dengan total ${totalNamesProcessed} anggota!`, 'success');
+        const duplicates = Object.keys(nameCounts).filter(name => nameCounts[name] > 1);
+        if (duplicates.length > 0) {
+          errors.push(`Nama duplikat ditemukan: ${duplicates.join(', ')}`);
         }
+      }
 
-        function generateTeams() {
-            clearMessages();
-            const teamCount = parseInt(document.getElementById('teamCount').value);
-            const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value);
-            let lines = document.getElementById('namesList').value.trim().split('\n');
+      if (errors.length > 0) {
+        validationMessagesDiv.innerHTML = errors.join('<br>');
+        generateBtn.disabled = true;
+      } else {
+        generateBtn.disabled = false;
+      }
+    }
 
-            // Strip leading numbering like "1. ", "63. " etc.
-            lines = lines.map(line => line.trim().replace(/^\d+\.\s*/, ''));
+    // Fisher-Yates shuffle
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
 
-            console.log('Raw lines count:', lines.length, lines);
+    // Generate teams on button click
+    generateBtn.addEventListener('click', () => {
+      const names = getNames();
+      const anggotaPerTim = parseInt(membersPerTeamInput.value, 10);
+      const shuffledNames = shuffleArray([...names]);
+      const numTeams = Math.ceil(names.length / anggotaPerTim);
+      const teams = [];
 
-            // Filter empty
-            const names = lines.filter(name => name.length > 0);
+      // Divide names into teams
+      for (let i = 0; i < numTeams; i++) {
+        const start = i * anggotaPerTim;
+        const end = start + anggotaPerTim;
+        teams.push(shuffledNames.slice(start, end));
+      }
 
-            if (names.length === 0) {
-                showMessage('Tidak ada nama valid yang ditemukan!', 'error');
-                return;
-            }
-            if (teamCount < 1 || membersPerTeam < 1) {
-                showMessage('Jumlah tim dan anggota per tim harus lebih dari 0!', 'error');
-                return;
-            }
+      renderGrid(teams);
+    });
 
-            // Remove duplicates
-            const uniqueNames = [...new Set(names)];
-            const duplicateCount = names.length - uniqueNames.length;
-            const duplicates = names.filter((n,i,a) => a.indexOf(n) !== i);
-            console.log('Duplicate entries removed:', duplicateCount, duplicates);
-            if (duplicateCount > 0) {
-                showMessage(`Ditemukan ${duplicateCount} nama duplikat yang dihapus: [${[...new Set(duplicates)].join(', ')}]`, 'success');
-            }
+    // Render teams in a grid
+    function renderGrid(teams) {
+      outputDiv.innerHTML = '';
+      const grid = document.createElement('div');
+      grid.className = 'team-grid';
 
-            totalNamesProcessed = uniqueNames.length;
-
-            // Shuffle & distribute
-            const shuffled = shuffleArray([...uniqueNames]);
-            const idealCapacity = teamCount * membersPerTeam;
-            let finalTeamCount = teamCount;
-            if (shuffled.length > idealCapacity) {
-                const extra = shuffled.length - idealCapacity;
-                const addTeams = Math.ceil(extra / membersPerTeam);
-                finalTeamCount += addTeams;
-                showMessage(`Nama melebihi kapasitas (${shuffled.length} > ${idealCapacity}). Membuat ${addTeams} tim tambahan.`, 'success');
-            }
-
-            currentTeams = distributeNamesToTeams(shuffled, finalTeamCount, membersPerTeam);
-
-            const assigned = currentTeams.flatMap(t => t.members);
-            if (assigned.length !== totalNamesProcessed) {
-                showMessage('Error: Ada nama yang terlewat dalam pembagian!', 'error');
-                return;
-            }
-
-            displayResults();
-            showMessage(`Berhasil membagi ${totalNamesProcessed} nama ke ${finalTeamCount} tim!`, 'success');
+      teams.forEach((team, index) => {
+        if (team.length > 0) { // Only render non-empty teams
+          const teamDiv = document.createElement('div');
+          teamDiv.className = 'team';
+          const header = document.createElement('h2');
+          header.textContent = `Tim ${index + 1}`;
+          teamDiv.appendChild(header);
+          const ul = document.createElement('ul');
+          team.forEach(name => {
+            const li = document.createElement('li');
+            li.textContent = name;
+            ul.appendChild(li);
+          });
+          teamDiv.appendChild(ul);
+          grid.appendChild(teamDiv);
         }
+      });
 
-        function distributeNamesToTeams(names, teamCount, maxPerTeam) {
-            const teams = Array.from({length: teamCount}, (_, i) => ({
-                name: `Tim ${i+1}`, members: []
-            }));
-            let idx = 0;
-            // fill base
-            for (let round = 0; round < maxPerTeam && idx < names.length; round++) {
-                for (let t = 0; t < teams.length && idx < names.length; t++) {
-                    teams[t].members.push(names[idx++]);
-                }
-            }
-            // overflow up to 7
-            while (idx < names.length) {
-                let placed = false;
-                for (let t = 0; t < teams.length && idx < names.length; t++) {
-                    if (teams[t].members.length < 7) {
-                        teams[t].members.push(names[idx++]);
-                        placed = true;
-                    }
-                }
-                if (!placed) break;
-            }
-            return teams;
-        }
+      outputDiv.appendChild(grid);
+    }
 
-        function shuffleArray(arr) {
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        }
-
-        function displayResults() {
-            document.getElementById('outputSection').classList.add('show');
-            const vg = document.getElementById('visualGrid');
-            const to = document.getElementById('textOutput');
-            vg.innerHTML = ''; to.textContent = '';
-
-            currentTeams.forEach(team => {
-                // visual
-                const card = document.createElement('div');
-                card.className = 'team-card';
-                const header = document.createElement('div');
-                header.className = 'team-header';
-                header.textContent = team.name;
-                card.appendChild(header);
-                const membersDiv = document.createElement('div');
-                membersDiv.className = 'team-members';
-                team.members.forEach(m => {
-                    const mDiv = document.createElement('div');
-                    mDiv.className = 'member-name';
-                    mDiv.textContent = m;
-                    membersDiv.appendChild(mDiv);
-                });
-                card.appendChild(membersDiv);
-                vg.appendChild(card);
-                // text
-                to.textContent += `${team.name}:\n` + team.members.map(m=>`- ${m}`).join('\n') + '\n\n';
-            });
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tab + 'Tab').classList.add('active');
-        }
-
-        async function copyToClipboard() {
-            const text = document.getElementById('textOutput').textContent;
-            try {
-                await navigator.clipboard.writeText(text);
-                showMessage('✅ Berhasil disalin ke clipboard!', 'success');
-            } catch {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                showMessage('✅ Berhasil disalin ke clipboard!', 'success');
-            }
-        }
-
-        function exportResults(format) {
-            if (!currentTeams.length) {
-                showMessage('Tidak ada data tim untuk diekspor!', 'error');
-                return;
-            }
-            let content, filename, mime;
-            if (format==='json') {
-                content = JSON.stringify({teams: currentTeams, exportDate: new Date(), totalMembers: totalNamesProcessed}, null, 2);
-                filename = `team-${new Date().toISOString().split('T')[0]}.json`;
-                mime = 'application/json';
-            } else {
-                content = document.getElementById('textOutput').textContent;
-                filename = `team-${new Date().toISOString().split('T')[0]}.txt`;
-                mime = 'text/plain';
-            }
-            const blob = new Blob([content], {type: mime});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showMessage(`✅ File ${filename} berhasil diunduh!`, 'success');
-        }
-
-        function clearAll() {
-            document.getElementById('namesList').value = '';
-            document.getElementById('fileInput').value = '';
-            document.getElementById('outputSection').classList.remove('show');
-            currentTeams = [];
-            totalNamesProcessed = 0;
-            clearMessages();
-            showMessage('Semua data telah dibersihkan.', 'success');
-        }
-
-        function showMessage(msg, type) {
-            const ma = document.getElementById('messageArea');
-            const d = document.createElement('div');
-            d.className = `message ${type}`;
-            d.textContent = msg;
-            ma.appendChild(d);
-            if (type === 'success') {
-                setTimeout(() => { if (d.parentNode) ma.removeChild(d); }, 5000);
-            }
-        }
-        function clearMessages() {
-            document.getElementById('messageArea').innerHTML = '';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('namesList').focus();
-            document.addEventListener('keydown', e => {
-                if ((e.ctrlKey||e.metaKey) && e.key==='Enter') generateTeams();
-            });
-        });
-    </script>
+    // Initial validation
+    updateValidation();
+  </script>
 </body>
 </html>
