@@ -108,8 +108,8 @@
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
+            margin-top: 15px;
             padding: 16px 32px;
-            margin-top: 16px;
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 600;
@@ -368,6 +368,54 @@
                 transform: translateY(0);
             }
         }
+
+        /* Distribution Info Styles */
+        .distribution-info {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInDown 0.4s ease-out;
+            transition: opacity 0.3s ease;
+        }
+
+        .distribution-info .info-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .distribution-info .info-content {
+            flex: 1;
+        }
+
+        .distribution-info .info-content strong {
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .distribution-info .info-content p {
+            color: #1e3a8a;
+            margin: 4px 0 0 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -441,6 +489,7 @@
         /**
          * Main function to generate teams from input data
          * Uses round-robin distribution to ensure balanced teams
+         * Smart overflow handling: if remainder < 5, distribute to existing teams
          */
         function generateTeams() {
             // Get input values
@@ -473,32 +522,145 @@
             // Shuffle participants for random distribution
             const shuffledParticipants = shuffleArray([...participants]);
 
-            // Calculate required number of teams
-            // If we have more participants than initial configuration allows, create additional teams
-            const maxParticipantsInInitialTeams = numTeamsInput * membersPerTeam;
-            const totalTeamsNeeded = Math.ceil(shuffledParticipants.length / membersPerTeam);
-            const finalTeamCount = Math.max(numTeamsInput, totalTeamsNeeded);
+            // Smart team calculation with overflow optimization
+            const { teams, distributionInfo } = calculateOptimalTeams(
+                shuffledParticipants, 
+                numTeamsInput, 
+                membersPerTeam
+            );
 
-            // Initialize teams array
-            currentTeams = [];
-            for (let i = 0; i < finalTeamCount; i++) {
-                currentTeams.push({
+            currentTeams = teams;
+
+            // Display results with distribution info
+            displayTeamCards();
+            generateTextOutput();
+            showResults();
+            
+            // Show distribution info if there was optimization
+            if (distributionInfo.wasOptimized) {
+                showDistributionInfo(distributionInfo);
+            }
+        }
+
+        /**
+         * Calculate optimal team distribution with smart overflow handling
+         * @param {Array} participants - List of participant names
+         * @param {number} numTeams - Desired number of teams
+         * @param {number} membersPerTeam - Target members per team
+         * @returns {Object} - Teams array and distribution info
+         */
+        function calculateOptimalTeams(participants, numTeams, membersPerTeam) {
+            const totalParticipants = participants.length;
+            const maxParticipantsInDesiredTeams = numTeams * membersPerTeam;
+            
+            let finalTeams = [];
+            let distributionInfo = {
+                wasOptimized: false,
+                optimizationType: '',
+                details: ''
+            };
+
+            // Initialize desired number of teams
+            for (let i = 0; i < numTeams; i++) {
+                finalTeams.push({
                     name: `Team ${i + 1}`,
                     members: []
                 });
             }
 
-            // Distribute participants using round-robin method
-            // This ensures even distribution across all teams
-            shuffledParticipants.forEach((participant, index) => {
-                const teamIndex = index % finalTeamCount;
-                currentTeams[teamIndex].members.push(participant);
-            });
+            if (totalParticipants <= maxParticipantsInDesiredTeams) {
+                // Case 1: Participants fit in desired teams
+                participants.forEach((participant, index) => {
+                    const teamIndex = index % numTeams;
+                    finalTeams[teamIndex].members.push(participant);
+                });
+            } else {
+                // Case 2: More participants than desired configuration
+                const overflow = totalParticipants - maxParticipantsInDesiredTeams;
+                
+                if (overflow < 5) {
+                    // Smart optimization: distribute overflow to existing teams (max 7 per team)
+                    // First, fill teams with base members
+                    for (let i = 0; i < maxParticipantsInDesiredTeams; i++) {
+                        const teamIndex = i % numTeams;
+                        finalTeams[teamIndex].members.push(participants[i]);
+                    }
+                    
+                    // Then distribute overflow members to existing teams
+                    const overflowParticipants = participants.slice(maxParticipantsInDesiredTeams);
+                    overflowParticipants.forEach((participant, index) => {
+                        const teamIndex = index % numTeams;
+                        finalTeams[teamIndex].members.push(participant);
+                    });
+                    
+                    distributionInfo = {
+                        wasOptimized: true,
+                        optimizationType: 'overflow_distribution',
+                        details: `${overflow} peserta tambahan didistribusikan ke tim yang sudah ada (beberapa tim menjadi ${membersPerTeam + 1} anggota)`
+                    };
+                } else {
+                    // Create additional teams for larger overflow
+                    const totalTeamsNeeded = Math.ceil(totalParticipants / membersPerTeam);
+                    
+                    // Add additional teams
+                    for (let i = numTeams; i < totalTeamsNeeded; i++) {
+                        finalTeams.push({
+                            name: `Team ${i + 1}`,
+                            members: []
+                        });
+                    }
+                    
+                    // Distribute all participants using round-robin
+                    participants.forEach((participant, index) => {
+                        const teamIndex = index % totalTeamsNeeded;
+                        finalTeams[teamIndex].members.push(participant);
+                    });
+                    
+                    distributionInfo = {
+                        wasOptimized: true,
+                        optimizationType: 'additional_teams',
+                        details: `Dibuat ${totalTeamsNeeded - numTeams} tim tambahan untuk mengakomodasi ${overflow} peserta ekstra`
+                    };
+                }
+            }
 
-            // Display results
-            displayTeamCards();
-            generateTextOutput();
-            showResults();
+            return { teams: finalTeams, distributionInfo };
+        }
+
+        /**
+         * Show distribution optimization info to user
+         * @param {Object} distributionInfo - Information about the distribution optimization
+         */
+        function showDistributionInfo(distributionInfo) {
+            // Create or update info banner
+            let infoBanner = document.getElementById('distributionInfo');
+            if (!infoBanner) {
+                infoBanner = document.createElement('div');
+                infoBanner.id = 'distributionInfo';
+                infoBanner.className = 'distribution-info';
+                
+                const resultsSection = document.getElementById('resultsSection');
+                const firstChild = resultsSection.firstElementChild;
+                resultsSection.insertBefore(infoBanner, firstChild);
+            }
+            
+            infoBanner.innerHTML = `
+                <div class="info-icon">ℹ️</div>
+                <div class="info-content">
+                    <strong>Optimisasi Distribusi Tim:</strong>
+                    <p>${distributionInfo.details}</p>
+                </div>
+            `;
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                infoBanner.style.opacity = '0';
+                setTimeout(() => {
+                    if (infoBanner.parentNode) {
+                        infoBanner.parentNode.removeChild(infoBanner);
+                    }
+                }, 300);
+            }, 8000);
         }
 
         /**
