@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Team Divider</title>
+  <title>Pembagi Tim</title>
   <style>
-    /* General styling */
+    /* Gaya umum */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -25,7 +25,7 @@
       margin-bottom: 20px;
     }
 
-    /* Form section styling */
+    /* Gaya bagian formulir */
     .form-section {
       margin-bottom: 20px;
     }
@@ -75,7 +75,7 @@
       cursor: not-allowed;
     }
 
-    /* Output section styling */
+    /* Gaya bagian keluaran */
     .output-section {
       margin-top: 20px;
     }
@@ -92,10 +92,9 @@
       background-color: #f9f9f9;
     }
     .team h2 {
-      margin: 0 0 8px 0;
+      margin: 0 0 10px 0;
       font-size: 16px;
       text-align: center;
-      font-weight: bold;
     }
     .team ul {
       list-style: none;
@@ -107,7 +106,7 @@
       margin-bottom: 5px;
     }
 
-    /* Responsive design */
+    /* Desain responsif */
     @media (max-width: 600px) {
       .container {
         padding: 15px;
@@ -124,7 +123,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Team Divider</h1>
+    <h1>Pembagi Tim</h1>
     <div class="form-section">
       <label for="membersPerTeam">Anggota per tim:</label>
       <input type="number" id="membersPerTeam" value="6" min="1">
@@ -140,7 +139,7 @@
   </div>
 
   <script>
-    // Element references
+    // Referensi elemen
     const membersPerTeamInput = document.getElementById('membersPerTeam');
     const namesTextarea = document.getElementById('names');
     const fileInput = document.getElementById('fileInput');
@@ -149,7 +148,7 @@
     const generateBtn = document.getElementById('generateBtn');
     const outputDiv = document.getElementById('output');
 
-    // Handle file upload
+    // Tangani unggahan file
     fileInput.addEventListener('change', () => {
       const file = fileInput.files[0];
       if (file) {
@@ -162,18 +161,18 @@
       }
     });
 
-    // Update validation on textarea input
+    // Perbarui validasi saat textarea berubah
     namesTextarea.addEventListener('input', updateValidation);
 
-    // Extract and clean names from textarea
+    // Ekstrak dan bersihkan nama dari textarea
     function getNames() {
       return namesTextarea.value
-        .split('\n')
+        .split(/\r?\n/)
         .map(name => name.trim())
-        .filter(name => name !== '');
+        .filter(name => name.length > 0);
     }
 
-    // Validate names and update UI
+    // Validasi nama dan perbarui UI
     function updateValidation() {
       const names = getNames();
       const totalNames = names.length;
@@ -184,12 +183,9 @@
       if (totalNames === 0) {
         errors.push('Masukkan setidaknya satu nama.');
       } else {
-        const nameCounts = {};
-        names.forEach(name => {
-          nameCounts[name] = (nameCounts[name] || 0) + 1;
-        });
-        const duplicates = Object.keys(nameCounts).filter(name => nameCounts[name] > 1);
-        if (duplicates.length > 0) {
+        const nameSet = new Set(names);
+        if (nameSet.size < totalNames) {
+          const duplicates = names.filter((name, index) => names.indexOf(name) !== index);
           errors.push(`Nama duplikat ditemukan: ${duplicates.join(', ')}`);
         }
       }
@@ -202,7 +198,7 @@
       }
     }
 
-    // Fisher-Yates shuffle
+    // Acak array dengan Fisher-Yates
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -211,52 +207,63 @@
       return array;
     }
 
-    // Generate teams on button click
+    // Generate tim saat tombol diklik
     generateBtn.addEventListener('click', () => {
       const names = getNames();
-      const anggotaPerTim = parseInt(membersPerTeamInput.value, 10);
+      const k = parseInt(membersPerTeamInput.value, 10);
+      const n = names.length;
+      if (n === 0 || k < 1) return;
+
       const shuffledNames = shuffleArray([...names]);
-      const numTeams = Math.ceil(names.length / anggotaPerTim);
-      const teams = [];
+      let teams = [];
 
-      // Divide names into teams
-      for (let i = 0; i < numTeams; i++) {
-        const start = i * anggotaPerTim;
-        const end = start + anggotaPerTim;
-        teams.push(shuffledNames.slice(start, end));
+      if (n < k) {
+        teams.push(shuffledNames);
+      } else {
+        const fullTeams = Math.floor(n / k);
+        const remaining = n % k;
+        for (let i = 0; i < fullTeams; i++) {
+          const start = i * k;
+          const end = start + k;
+          teams.push(shuffledNames.slice(start, end));
+        }
+        if (remaining > 0) {
+          const remainingNames = shuffledNames.slice(fullTeams * k);
+          const teamIndices = [...Array(fullTeams).keys()];
+          shuffleArray(teamIndices);
+          for (let i = 0; i < remaining; i++) {
+            const teamIndex = teamIndices[i];
+            teams[teamIndex].push(remainingNames[i]);
+          }
+        }
       }
-
-      renderGrid(teams);
+      renderTeams(teams);
     });
 
-    // Render teams in a grid
-    function renderGrid(teams) {
+    // Tampilkan tim dalam grid
+    function renderTeams(teams) {
       outputDiv.innerHTML = '';
       const grid = document.createElement('div');
       grid.className = 'team-grid';
-
       teams.forEach((team, index) => {
-        if (team.length > 0) { // Only render non-empty teams
-          const teamDiv = document.createElement('div');
-          teamDiv.className = 'team';
-          const header = document.createElement('h2');
-          header.textContent = `Tim ${index + 1}`;
-          teamDiv.appendChild(header);
-          const ul = document.createElement('ul');
-          team.forEach(name => {
-            const li = document.createElement('li');
-            li.textContent = name;
-            ul.appendChild(li);
-          });
-          teamDiv.appendChild(ul);
-          grid.appendChild(teamDiv);
-        }
+        const teamDiv = document.createElement('div');
+        teamDiv.className = 'team';
+        const header = document.createElement('h2');
+        header.textContent = `Tim ${index + 1}`;
+        teamDiv.appendChild(header);
+        const ul = document.createElement('ul');
+        team.forEach(name => {
+          const li = document.createElement('li');
+          li.textContent = name;
+          ul.appendChild(li);
+        });
+        teamDiv.appendChild(ul);
+        grid.appendChild(teamDiv);
       });
-
       outputDiv.appendChild(grid);
     }
 
-    // Initial validation
+    // Validasi awal
     updateValidation();
   </script>
 </body>
