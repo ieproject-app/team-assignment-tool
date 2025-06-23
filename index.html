@@ -5,35 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Team Generator</title>
   <style>
-    /* GLOBAL RESET */
+    /* GLOBAL STYLES */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: sans-serif; padding: 1rem; }
-    h1 { text-align: center; margin-bottom: 1rem; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; color: #333; padding: 1rem; }
+    h1 { text-align: center; margin-bottom: 1rem; font-size: 1.8rem; color: #2c3e50; }
+
+    /* CONTAINER */
+    #controls, #visual-output, #text-output, .instructions { max-width: 900px; margin: 0 auto; }
+    #controls { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 
     /* FORM STYLES */
-    .form-group { margin-bottom: 0.75rem; }
-    label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
-    input[type="number"], textarea, input[type="file"], select { width: 100%; padding: 0.5rem; font-size: 0.9rem; }
-    button { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #34495e; }
+    input[type="number"], textarea, input[type="file"] {
+      width: 100%; padding: 0.75rem; font-size: 0.95rem; border: 1px solid #ccd6dd; border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+    input[type="number"]:focus, textarea:focus, input[type="file"]:focus {
+      border-color: #5d9cec;
+      outline: none;
+    }
 
-    /* OUTPUT VISUAL GRID */
-    #visual-output { display: grid; gap: 0.5rem; margin-top: 1rem; }
-    .team-card { border: 1px solid #ccc; border-radius: 4px; padding: 0.5rem; font-size: 0.75rem; }
-    .team-card h3 { margin-bottom: 0.25rem; font-size: 0.85rem; }
+    /* BUTTONS */
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s, transform 0.1s; text-decoration: none; color: #fff; }
+    .btn-primary { background: #3498db; }
+    .btn-primary:hover { background: #2980b9; }
+    .btn-secondary { background: #7f8c8d; }
+    .btn-secondary:hover { background: #606b6e; }
+    .btn + .btn { margin-left: 0.5rem; }
+    .btn:active { transform: scale(0.98); }
+
+    /* VISUAL OUTPUT GRID */
+    #visual-output { display: grid; gap: 1rem; margin-top: 1.5rem; }
+    .team-card { background: #fff; border-radius: 6px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); font-size: 0.85rem; }
+    .team-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; color: #2c3e50; }
+    .team-card ul { list-style: none; }
+    /* RESPONSIVE GRID */
+    @media (min-width: 700px) {
+      #visual-output { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    }
+    @media (max-width: 699px) {
+      #visual-output { grid-template-columns: 1fr 1fr; }
+    }
 
     /* TEXT OUTPUT */
-    #text-output { margin-top: 1rem; background: #f9f9f9; padding: 0.5rem; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
+    #text-output { margin-top: 1.5rem; background: #fff; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 1px 4px rgba(0,0,0,0.1); white-space: pre-wrap; }
 
     /* INSTRUCTIONS */
-    .instructions { margin-top: 1rem; font-size: 0.85rem; background: #eef; padding: 0.5rem; border-radius: 4px; }
-
-    /* RESPONSIVE GRID */
-    @media (min-width: 600px) {
-      #visual-output { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
-    }
-    @media (max-width: 599px) {
-      #visual-output { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); }
-    }
+    .instructions { margin-top: 1.5rem; background: #ecf0f1; padding: 1rem; border-radius: 6px; font-size: 0.9rem; color: #2c3e50; }
+    .instructions ol { padding-left: 1.2rem; }
+    .instructions li { margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
@@ -57,10 +78,10 @@
       <label for="importNames">Import .txt/.json</label>
       <input type="file" id="importNames" accept=".txt, .json" />
     </div>
-    <button id="generateBtn">Generate</button>
-    <button id="copyBtn">Copy to Clipboard</button>
-    <button id="exportJsonBtn">Export JSON</button>
-    <button id="exportTxtBtn">Export TXT</button>
+    <button class="btn btn-primary" id="generateBtn">Generate</button>
+    <button class="btn btn-secondary" id="copyBtn">Copy to Clipboard</button>
+    <button class="btn btn-secondary" id="exportJsonBtn">Export JSON</button>
+    <button class="btn btn-secondary" id="exportTxtBtn">Export TXT</button>
   </div>
 
   <!-- VISUAL OUTPUT -->
@@ -108,60 +129,36 @@
       let names = raw.split(/\r?\n/).filter(n => n.trim());
       const perTeam = parseInt(document.getElementById('perTeam').value)||6;
       let numTeams = parseInt(document.getElementById('numTeams').value);
-      // auto-calc if not set
-      if (!numTeams || numTeams < 1) {
-        numTeams = Math.floor(names.length / perTeam) || 1;
-      }
-      let teams = [];
-      // initial fill
-      for (let i = 0; i < numTeams; i++) teams.push([]);
-      // assign
-      names.forEach((n, i) => {
-        const idx = i % numTeams;
-        teams[idx].push(n);
-      });
-      // handle overflow: if any team > perTeam, create extras
+      if (!numTeams || numTeams < 1) numTeams = Math.floor(names.length / perTeam) || 1;
+      let teams = Array.from({ length: numTeams }, () => []);
+      names.forEach((n, i) => teams[i % numTeams].push(n));
+      // handle overflow
       let extras = [];
-      teams = teams.map(arr => {
-        if (arr.length > perTeam) {
-          extras.push(...arr.splice(perTeam));
-        }
-        return arr;
-      });
-      // distribute extras
-      extras.forEach(name => {
-        // find team with < perTeam+1 or smallest
-        teams.sort((a,b)=> a.length - b.length);
-        teams[0].push(name);
-      });
-      // merge small remainders (<5) if new team size<5
+      teams.forEach((arr, idx) => { if (arr.length > perTeam) extras.push(...arr.splice(perTeam)); });
+      extras.forEach(name => { teams.sort((a,b)=>a.length-b.length)[0].push(name); });
+      // merge small
       teams = teams.filter(team => {
         if (team.length < 5 && teams.length > 1) {
-          // merge into the largest
-          teams.sort((a,b)=> b.length - a.length);
+          teams.sort((a,b)=>b.length-a.length);
           teams[0].push(...team);
           return false;
         }
         return true;
       });
-
       renderOutput(teams);
     });
 
     function renderOutput(teams) {
-      // Visual
       const grid = document.getElementById('visual-output');
       grid.innerHTML = '';
       teams.forEach((members, i) => {
-        const card = document.createElement('div');
-        card.className = 'team-card';
+        const card = document.createElement('div'); card.className = 'team-card';
         let html = `<h3>Tim ${i+1}</h3><ul>`;
         members.forEach(m=> html += `<li>${m}</li>`);
         html += '</ul>';
         card.innerHTML = html;
         grid.appendChild(card);
       });
-      // Text
       const txtDiv = document.getElementById('text-output');
       let txt = '';
       teams.forEach((members, i) => {
@@ -172,46 +169,31 @@
       txtDiv.textContent = txt.trim();
     }
 
-    // copy to clipboard
+    // Copy and export
     document.getElementById('copyBtn').addEventListener('click', () => {
-      const txt = document.getElementById('text-output').textContent;
-      navigator.clipboard.writeText(txt).then(()=> alert('Disalin ke clipboard')); 
+      navigator.clipboard.writeText(document.getElementById('text-output').textContent)
+        .then(()=> alert('Teks berhasil disalin ke clipboard'));
     });
-
-    // export JSON
     document.getElementById('exportJsonBtn').addEventListener('click', () => {
       const teams = parseTextOutput();
-      const data = { teams: teams.map((m,i)=> ({ name: `Tim ${i+1}`, members: m })) };
-      download(JSON.stringify(data, null, 2), 'teams.json', 'application/json');
+      download(JSON.stringify({ teams: teams.map((m,i)=>({ name: `Tim ${i+1}`, members: m })) }, null, 2), 'teams.json', 'application/json');
     });
-
-    // export TXT
     document.getElementById('exportTxtBtn').addEventListener('click', () => {
-      const txt = document.getElementById('text-output').textContent;
-      download(txt, 'teams.txt', 'text/plain');
+      download(document.getElementById('text-output').textContent, 'teams.txt', 'text/plain');
     });
 
     function parseTextOutput() {
-      const lines = document.getElementById('text-output').textContent.split(/\r?\n/);
-      let teams = [], cur = null;
-      lines.forEach(line => {
-        if (line.startsWith('Tim')) {
-          cur = [];
-          teams.push(cur);
-        } else if (line.startsWith('- ')) {
-          cur && cur.push(line.slice(2));
-        }
-      });
-      return teams;
+      return document.getElementById('text-output').textContent.split(/\r?\n/)
+        .reduce((res, line) => {
+          if (line.startsWith('Tim')) res.push([]);
+          else if (line.startsWith('- ')) res[res.length-1].push(line.slice(2));
+          return res;
+        }, []);
     }
-
     function download(content, filename, type) {
       const blob = new Blob([content], { type });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(a.href);
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+      a.click(); URL.revokeObjectURL(a.href);
     }
   </script>
 </body>
