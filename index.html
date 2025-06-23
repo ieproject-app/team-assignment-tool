@@ -353,6 +353,7 @@
     </style>
 </head>
 <body>
+<body>
     <div class="container">
         <div class="header">
             <h1>🎯 Team Assignment Tool</h1>
@@ -377,9 +378,9 @@
                     <label for="namesList">Daftar Nama (satu nama per baris)</label>
                     <textarea id="namesList" placeholder="Masukkan nama-nama di sini...
 Contoh:
-Ahmad Rizki
-Siti Nurhaliza
-Budi Santoso
+1. Ahmad Rifa’i
+2. Siti Nurhaliza
+3. Budi Santoso
 ..."></textarea>
                 </div>
 
@@ -394,7 +395,6 @@ Budi Santoso
                 </div>
             </div>
 
-            <!-- Message Area -->
             <div id="messageArea"></div>
 
             <!-- Output Section -->
@@ -403,13 +403,9 @@ Budi Santoso
                     <button class="tab-button active" onclick="switchTab('visual')">📋 Visual Grid</button>
                     <button class="tab-button" onclick="switchTab('text')">📝 Text Copy</button>
                 </div>
-
-                <!-- Visual Tab -->
                 <div class="tab-content active" id="visualTab">
                     <div class="visual-grid" id="visualGrid"></div>
                 </div>
-
-                <!-- Text Tab -->
                 <div class="tab-content" id="textTab">
                     <div class="text-output" id="textOutput"></div>
                     <div class="button-group">
@@ -417,7 +413,6 @@ Budi Santoso
                         <button class="btn btn-secondary" onclick="exportResults('txt')">💾 Export TXT</button>
                         <button class="btn btn-secondary" onclick="exportResults('json')">💾 Export JSON</button>
                     </div>
-                    
                     <div class="instructions">
                         <h4>📋 Cara Salin ke Excel:</h4>
                         <ol>
@@ -433,24 +428,16 @@ Budi Santoso
     </div>
 
     <script>
-        // Global variables to store team data
         let currentTeams = [];
         let totalNamesProcessed = 0;
 
-        /**
-         * File input handler - processes uploaded .txt or .json files
-         * Supports both name lists and previously exported team assignments
-         */
         document.getElementById('fileInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const content = e.target.result;
-                    
-                    // Try to parse as JSON first (for import functionality)
                     if (file.name.endsWith('.json')) {
                         const data = JSON.parse(content);
                         if (data.teams && Array.isArray(data.teams)) {
@@ -458,11 +445,8 @@ Budi Santoso
                             return;
                         }
                     }
-                    
-                    // Process as plain text name list
                     document.getElementById('namesList').value = content.trim();
                     showMessage('File berhasil dimuat! Klik Generate untuk membuat tim.', 'success');
-                    
                 } catch (error) {
                     showMessage('Error reading file: ' + error.message, 'error');
                 }
@@ -470,305 +454,188 @@ Budi Santoso
             reader.readAsText(file);
         });
 
-        /**
-         * Import previously exported team data
-         * Reconstructs the visual and text outputs from JSON data
-         */
         function importTeamData(data) {
             currentTeams = data.teams;
-            totalNamesProcessed = currentTeams.reduce((sum, team) => sum + team.members.length, 0);
-            
-            // Update input fields based on imported data
+            totalNamesProcessed = currentTeams.reduce((sum, t) => sum + t.members.length, 0);
             document.getElementById('teamCount').value = currentTeams.length;
             if (currentTeams.length > 0) {
-                document.getElementById('membersPerTeam').value = Math.max(...currentTeams.map(t => t.members.length));
+                document.getElementById('membersPerTeam').value =
+                    Math.max(...currentTeams.map(t => t.members.length));
             }
-            
-            // Populate textarea with all names for editing
             const allNames = currentTeams.flatMap(team => team.members);
             document.getElementById('namesList').value = allNames.join('\n');
-            
-            // Display the imported teams
             displayResults();
             showMessage(`Berhasil import ${currentTeams.length} tim dengan total ${totalNamesProcessed} anggota!`, 'success');
         }
 
-        /**
-         * Main team generation function
-         * Handles input validation, name processing, and team distribution logic
-         */
         function generateTeams() {
-            // Clear previous messages and get input values
             clearMessages();
             const teamCount = parseInt(document.getElementById('teamCount').value);
             const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value);
-            const namesText = document.getElementById('namesList').value.trim();
+            let lines = document.getElementById('namesList').value.trim().split('\n');
 
-            // Input validation
-            if (!namesText) {
-                showMessage('Silakan masukkan daftar nama atau upload file!', 'error');
-                return;
-            }
+            // Strip leading numbering like "1. ", "63. " etc.
+            lines = lines.map(line => line.trim().replace(/^\d+\.\s*/, ''));
 
-            if (teamCount < 1 || membersPerTeam < 1) {
-                showMessage('Jumlah tim dan anggota per tim harus lebih dari 0!', 'error');
-                return;
-            }
+            console.log('Raw lines count:', lines.length, lines);
 
-            // Process names - clean and filter empty lines
-            const names = namesText.split('\n')
-                .map(name => name.trim())
-                .filter(name => name.length > 0);
+            // Filter empty
+            const names = lines.filter(name => name.length > 0);
 
             if (names.length === 0) {
                 showMessage('Tidak ada nama valid yang ditemukan!', 'error');
                 return;
             }
+            if (teamCount < 1 || membersPerTeam < 1) {
+                showMessage('Jumlah tim dan anggota per tim harus lebih dari 0!', 'error');
+                return;
+            }
 
-            // Remove duplicates while preserving order
+            // Remove duplicates
             const uniqueNames = [...new Set(names)];
             const duplicateCount = names.length - uniqueNames.length;
-            
+            const duplicates = names.filter((n,i,a) => a.indexOf(n) !== i);
+            console.log('Duplicate entries removed:', duplicateCount, duplicates);
             if (duplicateCount > 0) {
-                showMessage(`Ditemukan ${duplicateCount} nama duplikat yang dihapus.`, 'success');
+                showMessage(`Ditemukan ${duplicateCount} nama duplikat yang dihapus: [${[...new Set(duplicates)].join(', ')}]`, 'success');
             }
 
             totalNamesProcessed = uniqueNames.length;
 
-            // Shuffle names for random distribution
-            const shuffledNames = shuffleArray([...uniqueNames]);
-            
-            // Calculate team distribution
+            // Shuffle & distribute
+            const shuffled = shuffleArray([...uniqueNames]);
             const idealCapacity = teamCount * membersPerTeam;
             let finalTeamCount = teamCount;
-
-            // If we have more names than ideal capacity, create additional teams
-            if (shuffledNames.length > idealCapacity) {
-                const extraNames = shuffledNames.length - idealCapacity;
-                const additionalTeams = Math.ceil(extraNames / membersPerTeam);
-                finalTeamCount = teamCount + additionalTeams;
-                
-                showMessage(
-                    `Nama melebihi kapasitas (${shuffledNames.length} > ${idealCapacity}). ` +
-                    `Membuat ${additionalTeams} tim tambahan.`, 
-                    'success'
-                );
+            if (shuffled.length > idealCapacity) {
+                const extra = shuffled.length - idealCapacity;
+                const addTeams = Math.ceil(extra / membersPerTeam);
+                finalTeamCount += addTeams;
+                showMessage(`Nama melebihi kapasitas (${shuffled.length} > ${idealCapacity}). Membuat ${addTeams} tim tambahan.`, 'success');
             }
 
-            // Distribute names to teams
-            currentTeams = distributeNamesToTeams(shuffledNames, finalTeamCount, membersPerTeam);
-            
-            // Verify all names are assigned
-            const assignedNames = currentTeams.flatMap(team => team.members);
-            if (assignedNames.length !== totalNamesProcessed) {
+            currentTeams = distributeNamesToTeams(shuffled, finalTeamCount, membersPerTeam);
+
+            const assigned = currentTeams.flatMap(t => t.members);
+            if (assigned.length !== totalNamesProcessed) {
                 showMessage('Error: Ada nama yang terlewat dalam pembagian!', 'error');
                 return;
             }
 
-            // Display results
             displayResults();
-            showMessage(
-                `Berhasil membagi ${totalNamesProcessed} nama ke ${finalTeamCount} tim!`, 
-                'success'
-            );
+            showMessage(`Berhasil membagi ${totalNamesProcessed} nama ke ${finalTeamCount} tim!`, 'success');
         }
 
-        /**
-         * Advanced team distribution algorithm
-         * Handles overflow by distributing remaining names evenly across teams
-         */
-        function distributeNamesToTeams(names, teamCount, maxMembersPerTeam) {
-            const teams = [];
-            
-            // Initialize teams
-            for (let i = 0; i < teamCount; i++) {
-                teams.push({
-                    name: `Tim ${i + 1}`,
-                    members: []
-                });
-            }
-
-            let nameIndex = 0;
-            
-            // First pass: Fill teams to their base capacity
-            for (let round = 0; round < maxMembersPerTeam && nameIndex < names.length; round++) {
-                for (let teamIndex = 0; teamIndex < teamCount && nameIndex < names.length; teamIndex++) {
-                    teams[teamIndex].members.push(names[nameIndex]);
-                    nameIndex++;
+        function distributeNamesToTeams(names, teamCount, maxPerTeam) {
+            const teams = Array.from({length: teamCount}, (_, i) => ({
+                name: `Tim ${i+1}`, members: []
+            }));
+            let idx = 0;
+            // fill base
+            for (let round = 0; round < maxPerTeam && idx < names.length; round++) {
+                for (let t = 0; t < teams.length && idx < names.length; t++) {
+                    teams[t].members.push(names[idx++]);
                 }
             }
-
-            // Second pass: Distribute remaining names (max 2 extra per team to reach limit of 7)
-            const maxTotalCapacity = 7; // As specified in requirements
-            while (nameIndex < names.length) {
-                let distributed = false;
-                
-                for (let teamIndex = 0; teamIndex < teamCount && nameIndex < names.length; teamIndex++) {
-                    if (teams[teamIndex].members.length < maxTotalCapacity) {
-                        teams[teamIndex].members.push(names[nameIndex]);
-                        nameIndex++;
-                        distributed = true;
+            // overflow up to 7
+            while (idx < names.length) {
+                let placed = false;
+                for (let t = 0; t < teams.length && idx < names.length; t++) {
+                    if (teams[t].members.length < 7) {
+                        teams[t].members.push(names[idx++]);
+                        placed = true;
                     }
                 }
-                
-                // If no team can accept more members, break to prevent infinite loop
-                if (!distributed) {
-                    console.warn('Could not distribute all names within team capacity limits');
-                    break;
-                }
+                if (!placed) break;
             }
-
             return teams;
         }
 
-        /**
-         * Fisher-Yates shuffle algorithm for random name distribution
-         */
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                [arr[i], arr[j]] = [arr[j], arr[i]];
             }
-            return shuffled;
+            return arr;
         }
 
-        /**
-         * Display results in both visual grid and text format
-         * Calculates responsive grid layout and generates copy-ready text
-         */
         function displayResults() {
-            const outputSection = document.getElementById('outputSection');
-            const visualGrid = document.getElementById('visualGrid');
-            const textOutput = document.getElementById('textOutput');
+            document.getElementById('outputSection').classList.add('show');
+            const vg = document.getElementById('visualGrid');
+            const to = document.getElementById('textOutput');
+            vg.innerHTML = ''; to.textContent = '';
 
-            // Show output section with animation
-            outputSection.classList.add('show');
-
-            // Generate visual grid
-            visualGrid.innerHTML = '';
             currentTeams.forEach(team => {
-                const teamCard = document.createElement('div');
-                teamCard.className = 'team-card';
-                
-                const teamHeader = document.createElement('div');
-                teamHeader.className = 'team-header';
-                teamHeader.textContent = team.name;
-                
-                const teamMembers = document.createElement('div');
-                teamMembers.className = 'team-members';
-                
-                team.members.forEach(member => {
-                    const memberDiv = document.createElement('div');
-                    memberDiv.className = 'member-name';
-                    memberDiv.textContent = member;
-                    teamMembers.appendChild(memberDiv);
+                // visual
+                const card = document.createElement('div');
+                card.className = 'team-card';
+                const header = document.createElement('div');
+                header.className = 'team-header';
+                header.textContent = team.name;
+                card.appendChild(header);
+                const membersDiv = document.createElement('div');
+                membersDiv.className = 'team-members';
+                team.members.forEach(m => {
+                    const mDiv = document.createElement('div');
+                    mDiv.className = 'member-name';
+                    mDiv.textContent = m;
+                    membersDiv.appendChild(mDiv);
                 });
-                
-                teamCard.appendChild(teamHeader);
-                teamCard.appendChild(teamMembers);
-                visualGrid.appendChild(teamCard);
+                card.appendChild(membersDiv);
+                vg.appendChild(card);
+                // text
+                to.textContent += `${team.name}:\n` + team.members.map(m=>`- ${m}`).join('\n') + '\n\n';
             });
-
-            // Generate text output (Excel-friendly format)
-            let textContent = '';
-            currentTeams.forEach((team, index) => {
-                textContent += `${team.name}:\n`;
-                team.members.forEach(member => {
-                    textContent += `- ${member}\n`;
-                });
-                if (index < currentTeams.length - 1) {
-                    textContent += '\n';
-                }
-            });
-            
-            textOutput.textContent = textContent;
         }
 
-        /**
-         * Tab switching functionality for output display modes
-         */
-        function switchTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
-
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(tabName + 'Tab').classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
         }
 
-        /**
-         * Copy text output to clipboard with user feedback
-         */
         async function copyToClipboard() {
-            const textOutput = document.getElementById('textOutput');
-            const text = textOutput.textContent;
-
+            const text = document.getElementById('textOutput').textContent;
             try {
                 await navigator.clipboard.writeText(text);
                 showMessage('✅ Berhasil disalin ke clipboard!', 'success');
-            } catch (err) {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
+            } catch {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
                 document.execCommand('copy');
-                document.body.removeChild(textArea);
+                document.body.removeChild(ta);
                 showMessage('✅ Berhasil disalin ke clipboard!', 'success');
             }
         }
 
-        /**
-         * Export functionality - supports both TXT and JSON formats
-         * JSON format allows for re-importing and editing assignments
-         */
         function exportResults(format) {
-            if (currentTeams.length === 0) {
+            if (!currentTeams.length) {
                 showMessage('Tidak ada data tim untuk diekspor!', 'error');
                 return;
             }
-
-            let content, filename, mimeType;
-
-            if (format === 'json') {
-                // JSON format for re-importing
-                content = JSON.stringify({
-                    teams: currentTeams,
-                    exportDate: new Date().toISOString(),
-                    totalMembers: totalNamesProcessed
-                }, null, 2);
-                filename = `team-assignment-${new Date().toISOString().split('T')[0]}.json`;
-                mimeType = 'application/json';
+            let content, filename, mime;
+            if (format==='json') {
+                content = JSON.stringify({teams: currentTeams, exportDate: new Date(), totalMembers: totalNamesProcessed}, null, 2);
+                filename = `team-${new Date().toISOString().split('T')[0]}.json`;
+                mime = 'application/json';
             } else {
-                // TXT format (same as copy text)
                 content = document.getElementById('textOutput').textContent;
-                filename = `team-assignment-${new Date().toISOString().split('T')[0]}.txt`;
-                mimeType = 'text/plain';
+                filename = `team-${new Date().toISOString().split('T')[0]}.txt`;
+                mime = 'text/plain';
             }
-
-            // Create and trigger download
-            const blob = new Blob([content], { type: mimeType });
+            const blob = new Blob([content], {type: mime});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
+            a.href = url; a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-
             showMessage(`✅ File ${filename} berhasil diunduh!`, 'success');
         }
 
-        /**
-         * Clear all inputs and outputs
-         */
         function clearAll() {
             document.getElementById('namesList').value = '';
             document.getElementById('fileInput').value = '';
@@ -779,43 +646,24 @@ Budi Santoso
             showMessage('Semua data telah dibersihkan.', 'success');
         }
 
-        /**
-         * Message display system for user feedback
-         */
-        function showMessage(message, type) {
-            const messageArea = document.getElementById('messageArea');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.textContent = message;
-            messageArea.appendChild(messageDiv);
-
-            // Auto-remove success messages after 5 seconds
+        function showMessage(msg, type) {
+            const ma = document.getElementById('messageArea');
+            const d = document.createElement('div');
+            d.className = `message ${type}`;
+            d.textContent = msg;
+            ma.appendChild(d);
             if (type === 'success') {
-                setTimeout(() => {
-                    if (messageDiv.parentNode) {
-                        messageDiv.parentNode.removeChild(messageDiv);
-                    }
-                }, 5000);
+                setTimeout(() => { if (d.parentNode) ma.removeChild(d); }, 5000);
             }
         }
-
         function clearMessages() {
             document.getElementById('messageArea').innerHTML = '';
         }
 
-        /**
-         * Initialize the application
-         * Set up event listeners and default values
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            // Focus on textarea for immediate use
+        document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('namesList').focus();
-            
-            // Add keyboard shortcut for quick generation (Ctrl/Cmd + Enter)
-            document.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    generateTeams();
-                }
+            document.addEventListener('keydown', e => {
+                if ((e.ctrlKey||e.metaKey) && e.key==='Enter') generateTeams();
             });
         });
     </script>
