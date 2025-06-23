@@ -1,312 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Generator Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom styling for file input */
-        .file-input-button {
-            background-color: #4338ca; /* Indigo-700 */
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* rounded-md */
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-weight: 500;
-        }
-        .file-input-button:hover {
-            background-color: #3730a3; /* Indigo-800 */
-        }
-        input[type="file"] {
-            display: none;
-        }
-        .card {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Generator</title>
+  <style>
+    /* GLOBAL RESET */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif; padding: 1rem; }
+    h1 { text-align: center; margin-bottom: 1rem; }
+
+    /* FORM STYLES */
+    .form-group { margin-bottom: 0.75rem; }
+    label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
+    input[type="number"], textarea, input[type="file"], select { width: 100%; padding: 0.5rem; font-size: 0.9rem; }
+    button { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; }
+
+    /* OUTPUT VISUAL GRID */
+    #visual-output { display: grid; gap: 0.5rem; margin-top: 1rem; }
+    .team-card { border: 1px solid #ccc; border-radius: 4px; padding: 0.5rem; font-size: 0.75rem; }
+    .team-card h3 { margin-bottom: 0.25rem; font-size: 0.85rem; }
+
+    /* TEXT OUTPUT */
+    #text-output { margin-top: 1rem; background: #f9f9f9; padding: 0.5rem; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
+
+    /* INSTRUCTIONS */
+    .instructions { margin-top: 1rem; font-size: 0.85rem; background: #eef; padding: 0.5rem; border-radius: 4px; }
+
+    /* RESPONSIVE GRID */
+    @media (min-width: 600px) {
+      #visual-output { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    }
+    @media (max-width: 599px) {
+      #visual-output { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); }
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
+  <h1>Team Generator</h1>
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-slate-900">Team Generator Pro</h1>
-            <p class="text-slate-600 mt-2">Easily create fair and random teams.</p>
-        </header>
-
-        <!-- Main Content -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            <!-- Left Column: Settings -->
-            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                <h2 class="text-2xl font-bold mb-6 border-b pb-3 text-slate-900">Settings</h2>
-                
-                <!-- Number of Teams -->
-                <div class="mb-4">
-                    <label for="numTeams" class="block text-sm font-medium text-slate-700 mb-1">Number of Teams</label>
-                    <input type="number" id="numTeams" value="3" min="1" class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                
-                <!-- Members per Team -->
-                <div class="mb-4">
-                    <label for="numMembers" class="block text-sm font-medium text-slate-700 mb-1">Members per Team</label>
-                    <input type="number" id="numMembers" value="6" min="1" class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <!-- Participant Names -->
-                <div class="mb-4">
-                    <label for="participants" class="block text-sm font-medium text-slate-700 mb-1">Participant Names (one per line)</label>
-                    <textarea id="participants" rows="8" class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Alice&#10;Bob&#10;Charlie..."></textarea>
-                </div>
-                
-                <!-- File Input -->
-                <div class="mb-6">
-                    <label for="fileInput" class="file-input-button">
-                        Import from .txt file
-                    </label>
-                    <input type="file" id="fileInput" accept=".txt">
-                    <span id="fileName" class="text-sm text-slate-500 ml-2">No file chosen</span>
-                </div>
-
-                <!-- Generate Button -->
-                <button id="generateBtn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition-all duration-200">
-                    Generate Teams
-                </button>
-                 <div id="error-message" class="mt-4 text-red-600 font-medium text-center"></div>
-            </div>
-
-            <!-- Right Column: Output -->
-            <div class="lg:col-span-2">
-                <!-- Card Layout Output -->
-                <div>
-                    <h2 class="text-2xl font-bold mb-4 text-slate-900">Team Cards</h2>
-                    <div id="card-output" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        <!-- Team cards will be generated here -->
-                        <div class="text-slate-500 p-4 text-center col-span-full">Your generated teams will appear here.</div>
-                    </div>
-                </div>
-
-                <!-- Copyable Text Output -->
-                <div class="mt-8">
-                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-bold text-slate-900">Copyable Text Format</h2>
-                        <button id="copyBtn" class="bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-500 focus:ring-opacity-30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            Copy to Clipboard
-                        </button>
-                    </div>
-                    <pre id="text-output" class="bg-slate-100 p-4 rounded-lg border border-slate-200 text-sm overflow-x-auto whitespace-pre-wrap min-h-[150px]"><code class="text-slate-500">Your copyable team list will appear here.</code></pre>
-                </div>
-            </div>
-        </main>
+  <!-- INPUT FORM -->
+  <div id="controls">
+    <div class="form-group">
+      <label for="numTeams">Jumlah Tim (kosong = auto)</label>
+      <input type="number" id="numTeams" placeholder="3" min="1" />
     </div>
+    <div class="form-group">
+      <label for="perTeam">Anggota per Tim (default 6)</label>
+      <input type="number" id="perTeam" value="6" min="1" />
+    </div>
+    <div class="form-group">
+      <label for="names">Daftar Nama (satu per baris)</label>
+      <textarea id="names" rows="6" placeholder="Nama 1\nNama 2\n..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="importNames">Import .txt/.json</label>
+      <input type="file" id="importNames" accept=".txt, .json" />
+    </div>
+    <button id="generateBtn">Generate</button>
+    <button id="copyBtn">Copy to Clipboard</button>
+    <button id="exportJsonBtn">Export JSON</button>
+    <button id="exportTxtBtn">Export TXT</button>
+  </div>
 
-    <script>
-        // DOM element references
-        const numTeamsInput = document.getElementById('numTeams');
-        const numMembersInput = document.getElementById('numMembers');
-        const participantsTextarea = document.getElementById('participants');
-        const fileInput = document.getElementById('fileInput');
-        const fileNameSpan = document.getElementById('fileName');
-        const generateBtn = document.getElementById('generateBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const cardOutput = document.getElementById('card-output');
-        const textOutput = document.getElementById('text-output');
-        const errorMessage = document.getElementById('error-message');
+  <!-- VISUAL OUTPUT -->
+  <div id="visual-output"></div>
 
-        // --- Event Listeners ---
+  <!-- TEXT OUTPUT -->
+  <div id="text-output"></div>
 
-        // Handle file input changes
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    participantsTextarea.value = e.target.result;
-                    fileNameSpan.textContent = file.name;
-                };
-                reader.readAsText(file);
-            } else {
-                fileNameSpan.textContent = 'No file chosen';
-            }
-        });
+  <!-- INSTRUCTIONS -->
+  <div class="instructions">
+    <strong>Cara Salin ke Excel:</strong>
+    <ol>
+      <li>Klik tombol "Copy to Clipboard"</li>
+      <li>Buka Excel, lalu Paste (Ctrl + V)</li>
+      <li>Gunakan font <em>Consolas</em> agar struktur rapi</li>
+      <li>Untuk data tabular, gunakan fitur <em>Text to Columns</em></li>
+    </ol>
+  </div>
 
-        // Handle the main "Generate Teams" button click
-        generateBtn.addEventListener('click', generateTeams);
-
-        // Handle the "Copy to Clipboard" button click
-        copyBtn.addEventListener('click', () => {
-            const textToCopy = textOutput.textContent;
-            
-            // Using a temporary textarea to preserve formatting
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = textToCopy;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            
-            try {
-                // Use the modern clipboard API if available
-                 if (navigator.clipboard) {
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => copyBtn.textContent = 'Copy to Clipboard', 2000);
-                    });
-                } else {
-                   // Fallback for older browsers
-                   document.execCommand('copy');
-                   copyBtn.textContent = 'Copied!';
-                   setTimeout(() => copyBtn.textContent = 'Copy to Clipboard', 2000);
-                }
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-                // Handle potential errors, e.g., show an error message
-            }
-            
-            document.body.removeChild(tempTextArea);
-        });
-
-
-        // --- Core Logic ---
-
-        /**
-         * Main function to generate and display teams.
-         */
-        function generateTeams() {
-            // 1. Get and parse inputs
-            let numTeams = parseInt(numTeamsInput.value);
-            let numMembers = parseInt(numMembersInput.value);
-            const participants = participantsTextarea.value
-                .split('\n')
-                .map(name => name.trim())
-                .filter(name => name !== '');
-            
-            // Clear previous outputs and errors
-            cardOutput.innerHTML = '';
-            textOutput.innerHTML = `<code class="text-slate-500">Your copyable team list will appear here.</code>`;
-            errorMessage.textContent = '';
-            copyBtn.disabled = true;
-
-
-            // Input validation
-            if (participants.length === 0) {
-                errorMessage.textContent = 'Please enter at least one participant.';
-                return;
-            }
-            if (numTeams <= 0 || numMembers <= 0) {
-                 errorMessage.textContent = 'Number of teams and members must be greater than zero.';
-                return;
-            }
-
-
-            // 2. Shuffle participants for randomness
-            const shuffledParticipants = [...participants].sort(() => Math.random() - 0.5);
-
-            // 3. Initialize teams structure
-            let teams = Array.from({ length: numTeams }, (_, i) => ({
-                name: `Team ${i + 1}`,
-                members: []
-            }));
-
-            // 4. Distribute members
-            let participantIndex = 0;
-            
-            // Fill initial teams evenly
-            for (let i = 0; i < numMembers; i++) {
-                for (let j = 0; j < numTeams; j++) {
-                    if (participantIndex < shuffledParticipants.length) {
-                        teams[j].members.push(shuffledParticipants[participantIndex]);
-                        participantIndex++;
-                    }
-                }
-            }
-            
-            // Handle remaining participants (overflow)
-            const remainingParticipants = shuffledParticipants.slice(participantIndex);
-
-            if (remainingParticipants.length > 0) {
-                // If remainder is less than 5, redistribute to existing teams
-                if (remainingParticipants.length < 5) {
-                    let teamIndex = 0;
-                    remainingParticipants.forEach(member => {
-                        teams[teamIndex % numTeams].members.push(member);
-                        teamIndex++;
-                    });
-                } else {
-                    // Otherwise, create new teams for the overflow
-                    let remainingIndex = 0;
-                    while(remainingIndex < remainingParticipants.length) {
-                        const newTeamName = `Team ${teams.length + 1}`;
-                        const newTeamMembers = remainingParticipants.slice(remainingIndex, remainingIndex + numMembers);
-                        teams.push({ name: newTeamName, members: newTeamMembers });
-                        remainingIndex += numMembers;
-                    }
-                }
-            }
-
-
-            // 5. Render the results
-            renderTeamCards(teams);
-            renderTextOutput(teams);
-            copyBtn.disabled = false;
+  <script>
+    // Utility: read file input
+    document.getElementById('importNames').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        let content = reader.result;
+        if (ext === 'json') {
+          try {
+            const obj = JSON.parse(content);
+            let lines = [];
+            obj.teams.forEach(t => lines.push(...t.members));
+            document.getElementById('names').value = lines.join('\n');
+          } catch (err) { alert('Gagal parse JSON'); }
+        } else {
+          document.getElementById('names').value = content;
         }
+      };
+      reader.readAsText(file);
+    });
 
-        /**
-         * Renders the teams into a responsive card layout.
-         * @param {Array} teams - The array of team objects.
-         */
-        function renderTeamCards(teams) {
-            if (teams.length === 0) return;
-            
-            teams.forEach(team => {
-                const card = document.createElement('div');
-                card.className = 'card bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col';
-
-                const teamName = document.createElement('h3');
-                teamName.className = 'text-lg font-bold mb-2 text-indigo-600';
-                teamName.textContent = `${team.name} (${team.members.length} members)`;
-                
-                const memberList = document.createElement('ul');
-                memberList.className = 'list-disc list-inside text-slate-700 space-y-1 flex-grow';
-
-                team.members.forEach(member => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = member;
-                    memberList.appendChild(listItem);
-                });
-
-                card.appendChild(teamName);
-                card.appendChild(memberList);
-                cardOutput.appendChild(card);
-            });
+    document.getElementById('generateBtn').addEventListener('click', () => {
+      const raw = document.getElementById('names').value.trim();
+      let names = raw.split(/\r?\n/).filter(n => n.trim());
+      const perTeam = parseInt(document.getElementById('perTeam').value)||6;
+      let numTeams = parseInt(document.getElementById('numTeams').value);
+      // auto-calc if not set
+      if (!numTeams || numTeams < 1) {
+        numTeams = Math.floor(names.length / perTeam) || 1;
+      }
+      let teams = [];
+      // initial fill
+      for (let i = 0; i < numTeams; i++) teams.push([]);
+      // assign
+      names.forEach((n, i) => {
+        const idx = i % numTeams;
+        teams[idx].push(n);
+      });
+      // handle overflow: if any team > perTeam, create extras
+      let extras = [];
+      teams = teams.map(arr => {
+        if (arr.length > perTeam) {
+          extras.push(...arr.splice(perTeam));
         }
-        
-        /**
-         * Renders the teams into a plain text, copyable format.
-         * @param {Array} teams - The array of team objects.
-         */
-        function renderTextOutput(teams) {
-            if (teams.length === 0) return;
-
-            const textContent = teams.map(team => {
-                const header = `*${team.name}*`;
-                const members = team.members.map(member => `  - ${member}`).join('\n');
-                return `${header}\n${members}`;
-            }).join('\n\n');
-            
-            textOutput.innerHTML = `<code>${textContent}</code>`;
+        return arr;
+      });
+      // distribute extras
+      extras.forEach(name => {
+        // find team with < perTeam+1 or smallest
+        teams.sort((a,b)=> a.length - b.length);
+        teams[0].push(name);
+      });
+      // merge small remainders (<5) if new team size<5
+      teams = teams.filter(team => {
+        if (team.length < 5 && teams.length > 1) {
+          // merge into the largest
+          teams.sort((a,b)=> b.length - a.length);
+          teams[0].push(...team);
+          return false;
         }
+        return true;
+      });
 
-    </script>
+      renderOutput(teams);
+    });
 
+    function renderOutput(teams) {
+      // Visual
+      const grid = document.getElementById('visual-output');
+      grid.innerHTML = '';
+      teams.forEach((members, i) => {
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        let html = `<h3>Tim ${i+1}</h3><ul>`;
+        members.forEach(m=> html += `<li>${m}</li>`);
+        html += '</ul>';
+        card.innerHTML = html;
+        grid.appendChild(card);
+      });
+      // Text
+      const txtDiv = document.getElementById('text-output');
+      let txt = '';
+      teams.forEach((members, i) => {
+        txt += `Tim ${i+1}\n`;
+        members.forEach(m=> txt += `- ${m}\n`);
+        txt += '\n';
+      });
+      txtDiv.textContent = txt.trim();
+    }
+
+    // copy to clipboard
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const txt = document.getElementById('text-output').textContent;
+      navigator.clipboard.writeText(txt).then(()=> alert('Disalin ke clipboard')); 
+    });
+
+    // export JSON
+    document.getElementById('exportJsonBtn').addEventListener('click', () => {
+      const teams = parseTextOutput();
+      const data = { teams: teams.map((m,i)=> ({ name: `Tim ${i+1}`, members: m })) };
+      download(JSON.stringify(data, null, 2), 'teams.json', 'application/json');
+    });
+
+    // export TXT
+    document.getElementById('exportTxtBtn').addEventListener('click', () => {
+      const txt = document.getElementById('text-output').textContent;
+      download(txt, 'teams.txt', 'text/plain');
+    });
+
+    function parseTextOutput() {
+      const lines = document.getElementById('text-output').textContent.split(/\r?\n/);
+      let teams = [], cur = null;
+      lines.forEach(line => {
+        if (line.startsWith('Tim')) {
+          cur = [];
+          teams.push(cur);
+        } else if (line.startsWith('- ')) {
+          cur && cur.push(line.slice(2));
+        }
+      });
+      return teams;
+    }
+
+    function download(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  </script>
 </body>
 </html>
