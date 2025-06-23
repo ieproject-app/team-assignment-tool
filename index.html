@@ -102,10 +102,17 @@
   </div>
 
   <script>
-    // Utility: read file input
+    // Fisher-Yates shuffle to randomize array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Read import file
     document.getElementById('importNames').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         const ext = file.name.split('.').pop().toLowerCase();
@@ -116,10 +123,8 @@
             let lines = [];
             obj.teams.forEach(t => lines.push(...t.members));
             document.getElementById('names').value = lines.join('\n');
-          } catch (err) { alert('Gagal parse JSON'); }
-        } else {
-          document.getElementById('names').value = content;
-        }
+          } catch { alert('Gagal parse JSON'); }
+        } else document.getElementById('names').value = content;
       };
       reader.readAsText(file);
     });
@@ -127,16 +132,28 @@
     document.getElementById('generateBtn').addEventListener('click', () => {
       const raw = document.getElementById('names').value.trim();
       let names = raw.split(/\r?\n/).filter(n => n.trim());
-      const perTeam = parseInt(document.getElementById('perTeam').value)||6;
+      if (!names.length) return alert('Masukkan minimal satu nama');
+
+      // Shuffle names to avoid proximity
+      shuffle(names);
+
+      const perTeam = parseInt(document.getElementById('perTeam').value) || 6;
       let numTeams = parseInt(document.getElementById('numTeams').value);
       if (!numTeams || numTeams < 1) numTeams = Math.floor(names.length / perTeam) || 1;
+
+      // Initialize teams
       let teams = Array.from({ length: numTeams }, () => []);
+
+      // Distribute evenly first
       names.forEach((n, i) => teams[i % numTeams].push(n));
-      // handle overflow
+
+      // Handle overflow
       let extras = [];
-      teams.forEach((arr, idx) => { if (arr.length > perTeam) extras.push(...arr.splice(perTeam)); });
+      teams.forEach(arr => { if (arr.length > perTeam) extras.push(...arr.splice(perTeam)); });
+      shuffle(extras);
       extras.forEach(name => { teams.sort((a,b)=>a.length-b.length)[0].push(name); });
-      // merge small
+
+      // Merge very small groups (<5)
       teams = teams.filter(team => {
         if (team.length < 5 && teams.length > 1) {
           teams.sort((a,b)=>b.length-a.length);
@@ -145,34 +162,35 @@
         }
         return true;
       });
+
       renderOutput(teams);
     });
 
     function renderOutput(teams) {
-      const grid = document.getElementById('visual-output');
-      grid.innerHTML = '';
+      const grid = document.getElementById('visual-output'); grid.innerHTML = '';
       teams.forEach((members, i) => {
         const card = document.createElement('div'); card.className = 'team-card';
         let html = `<h3>Tim ${i+1}</h3><ul>`;
-        members.forEach(m=> html += `<li>${m}</li>`);
+        members.forEach(m => html += `<li>${m}</li>`);
         html += '</ul>';
         card.innerHTML = html;
         grid.appendChild(card);
       });
+
       const txtDiv = document.getElementById('text-output');
       let txt = '';
       teams.forEach((members, i) => {
         txt += `Tim ${i+1}\n`;
-        members.forEach(m=> txt += `- ${m}\n`);
+        members.forEach(m => txt += `- ${m}\n`);
         txt += '\n';
       });
       txtDiv.textContent = txt.trim();
     }
 
-    // Copy and export
+    // Copy & Export
     document.getElementById('copyBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(document.getElementById('text-output').textContent)
-        .then(()=> alert('Teks berhasil disalin ke clipboard'));
+      const text = document.getElementById('text-output').textContent;
+      navigator.clipboard.writeText(text).then(() => alert('Teks berhasil disalin!'));
     });
     document.getElementById('exportJsonBtn').addEventListener('click', () => {
       const teams = parseTextOutput();
@@ -190,6 +208,7 @@
           return res;
         }, []);
     }
+
     function download(content, filename, type) {
       const blob = new Blob([content], { type });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
