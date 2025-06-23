@@ -64,7 +64,7 @@
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 20px;
             margin-bottom: 25px;
         }
@@ -104,6 +104,57 @@
             font-family: 'Courier New', monospace;
         }
 
+        .file-input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 16px;
+            border: 2px dashed #e5e7eb;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .file-input-label span {
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .file-info {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
         .generate-btn {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -115,6 +166,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+            flex: 1;
+            min-width: 200px;
         }
 
         .generate-btn:hover {
@@ -124,6 +177,25 @@
 
         .generate-btn:active {
             transform: translateY(0);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .secondary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(59, 130, 246, 0.4);
         }
 
         /* Results Section */
@@ -522,6 +594,23 @@
                 transform: translateY(0);
             }
         }
+
+        /* Validation Message */
+        .validation-message {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 15px;
+            color: #b91c1c;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .validation-message.show {
+            display: block;
+            animation: slideInDown 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -536,10 +625,6 @@
             <div class="input-section">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="numTeams">Number of Teams</label>
-                        <input type="number" id="numTeams" min="1" max="50" value="3" />
-                    </div>
-                    <div class="form-group">
                         <label for="membersPerTeam">Members per Team</label>
                         <input type="number" id="membersPerTeam" min="1" max="20" value="6" />
                     </div>
@@ -552,9 +637,26 @@
                         rows="8"
                     ></textarea>
                 </div>
-                <button class="generate-btn" onclick="generateTeams()">
-                    🎲 Generate Teams
-                </button>
+
+                <!-- File Import Section -->
+                <div class="file-input-container">
+                    <label for="fileInput" class="file-input-label">
+                        <span>Click to import names from TXT file</span> or drag and drop file here
+                    </label>
+                    <input type="file" id="fileInput" class="file-input" accept=".txt">
+                    <div id="fileInfo" class="file-info"></div>
+                </div>
+
+                <div id="validationMessage" class="validation-message"></div>
+
+                <div class="button-group">
+                    <button class="generate-btn" onclick="generateTeams()">
+                        🎲 Generate Teams
+                    </button>
+                    <button class="secondary-btn" onclick="clearAll()">
+                        🗑️ Clear All
+                    </button>
+                </div>
             </div>
 
             <!-- Results Section -->
@@ -570,16 +672,19 @@
                         <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">
                             📋 Copy to Clipboard
                         </button>
+                        <button class="secondary-btn" id="exportExcelBtn" onclick="exportToExcel()">
+                            📊 Export to Excel
+                        </button>
                     </div>
                     <div class="text-table" id="textTable"></div>
                     
                     <!-- Excel Instructions -->
                     <div class="excel-instructions">
-                        <h3>Cara Salin ke Excel:</h3>
+                        <h3>How to Export to Excel:</h3>
                         <ol>
-                            <li>Klik tombol "Copy to Clipboard" di atas</li>
-                            <li>Buka Excel dan paste langsung (Ctrl+V)</li>
-                            <li>Gunakan menu <em>Data > Text to Columns > Delimited > Tab</em> untuk memisahkan kolom secara otomatis</li>
+                            <li>Click "Export to Excel" button for formatted Excel file</li>
+                            <li>Or copy the table and paste directly to Excel</li>
+                            <li>Use <em>Data > Text to Columns > Delimited > Tab</em> if needed</li>
                         </ol>
                     </div>
                 </div>
@@ -591,6 +696,7 @@
         // Global variables to store current results
         let currentTeams = [];
         let currentTextOutput = '';
+        let currentParticipants = [];
 
         /**
          * Main function to generate teams from input data
@@ -599,18 +705,17 @@
          */
         function generateTeams() {
             // Get input values
-            const numTeamsInput = parseInt(document.getElementById('numTeams').value);
             const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value);
             const participantText = document.getElementById('participantNames').value.trim();
 
             // Validate inputs
             if (!participantText) {
-                alert('Please enter participant names!');
+                showValidationMessage('Please enter participant names!');
                 return;
             }
 
-            if (numTeamsInput < 1 || membersPerTeam < 1) {
-                alert('Please enter valid numbers for teams and members!');
+            if (membersPerTeam < 1 || membersPerTeam > 20) {
+                showValidationMessage('Please enter valid number for members per team (1-20)!');
                 return;
             }
 
@@ -621,21 +726,30 @@
                 .filter(name => name.length > 0);
 
             if (participants.length === 0) {
-                alert('No valid participant names found!');
+                showValidationMessage('No valid participant names found!');
                 return;
             }
+
+            // Store current participants for validation
+            currentParticipants = [...participants];
 
             // Shuffle participants for random distribution
             const shuffledParticipants = shuffleArray([...participants]);
 
+            // Calculate number of teams needed
+            const numTeams = Math.ceil(participants.length / membersPerTeam);
+
             // Smart team calculation with overflow optimization
             const { teams, distributionInfo } = calculateOptimalTeams(
                 shuffledParticipants, 
-                numTeamsInput, 
+                numTeams, 
                 membersPerTeam
             );
 
             currentTeams = teams;
+
+            // Validate all names are included
+            validateAllNamesIncluded(participants, teams);
 
             // Display results with distribution info
             displayTeamCards();
@@ -646,6 +760,40 @@
             if (distributionInfo.wasOptimized) {
                 showDistributionInfo(distributionInfo);
             }
+        }
+
+        /**
+         * Validate that all input names are included in the teams
+         * @param {Array} originalNames - Original list of participant names
+         * @param {Array} teams - Generated teams
+         */
+        function validateAllNamesIncluded(originalNames, teams) {
+            const allTeamMembers = teams.flatMap(team => team.members);
+            const missingNames = originalNames.filter(name => !allTeamMembers.includes(name));
+            
+            if (missingNames.length > 0) {
+                showValidationMessage(`Warning: ${missingNames.length} names not included in teams. Please regenerate.`);
+            } else {
+                hideValidationMessage();
+            }
+        }
+
+        /**
+         * Show validation message to user
+         * @param {string} message - Message to display
+         */
+        function showValidationMessage(message) {
+            const validationDiv = document.getElementById('validationMessage');
+            validationDiv.textContent = message;
+            validationDiv.classList.add('show');
+        }
+
+        /**
+         * Hide validation message
+         */
+        function hideValidationMessage() {
+            const validationDiv = document.getElementById('validationMessage');
+            validationDiv.classList.remove('show');
         }
 
         /**
@@ -702,7 +850,7 @@
                     distributionInfo = {
                         wasOptimized: true,
                         optimizationType: 'overflow_distribution',
-                        details: `${overflow} peserta tambahan didistribusikan ke tim yang sudah ada (beberapa tim menjadi ${membersPerTeam + 1} anggota)`
+                        details: `${overflow} additional participants distributed to existing teams (some teams have ${membersPerTeam + 1} members)`
                     };
                 } else {
                     // Create additional teams for larger overflow
@@ -725,7 +873,7 @@
                     distributionInfo = {
                         wasOptimized: true,
                         optimizationType: 'additional_teams',
-                        details: `Dibuat ${totalTeamsNeeded - numTeams} tim tambahan untuk mengakomodasi ${overflow} peserta ekstra`
+                        details: `Created ${totalTeamsNeeded - numTeams} additional teams to accommodate ${overflow} extra participants`
                     };
                 }
             }
@@ -753,7 +901,7 @@
             infoBanner.innerHTML = `
                 <div class="info-icon">ℹ️</div>
                 <div class="info-content">
-                    <strong>Optimisasi Distribusi Tim:</strong>
+                    <strong>Team Distribution Optimization:</strong>
                     <p>${distributionInfo.details}</p>
                 </div>
             `;
@@ -838,7 +986,7 @@
             const screenshotBtn = document.createElement('button');
             screenshotBtn.id = 'screenshotBtn';
             screenshotBtn.className = 'screenshot-btn';
-            screenshotBtn.innerHTML = '📸 Mode Screenshot';
+            screenshotBtn.innerHTML = '📸 Screenshot Mode';
             screenshotBtn.onclick = toggleScreenshotMode;
 
             // Insert before teams grid
@@ -857,7 +1005,7 @@
             teamsGrid.classList.toggle('screenshot-mode');
             
             if (teamsGrid.classList.contains('screenshot-mode')) {
-                screenshotBtn.innerHTML = '👁️ Mode Normal';
+                screenshotBtn.innerHTML = '👁️ Normal Mode';
                 screenshotBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
                 
                 // Scroll to teams grid for better screenshot
@@ -869,7 +1017,7 @@
                 // Show screenshot tip
                 showScreenshotTip();
             } else {
-                screenshotBtn.innerHTML = '📸 Mode Screenshot';
+                screenshotBtn.innerHTML = '📸 Screenshot Mode';
                 screenshotBtn.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
             }
         }
@@ -889,8 +1037,8 @@
             tip.className = 'screenshot-tip';
             tip.innerHTML = `
                 <div class="tip-content">
-                    💡 <strong>Tips Screenshot:</strong> 
-                    Layout sudah dioptimalkan untuk screenshot. Gunakan Snipping Tool atau screenshot browser untuk hasil terbaik.
+                    💡 <strong>Screenshot Tip:</strong> 
+                    Layout optimized for screenshots. Use Snipping Tool or browser screenshot for best results.
                 </div>
             `;
 
@@ -914,18 +1062,57 @@
         function generateTextOutput() {
             let output = '';
             
-            // Add header row
-            output += 'Team Name\tMember Name\n';
+            // Add header row with styling markers for Excel
+            output += 'Team Name\tMember Name\t\n';
             
             // Add team data with tab separation
             currentTeams.forEach(team => {
                 team.members.forEach(member => {
-                    output += `${team.name}\t${member}\n`;
+                    output += `${team.name}\t${member}\t\n`;
                 });
+                // Add empty row after each team for better Excel formatting
+                output += '\t\t\n';
             });
             
             currentTextOutput = output;
             document.getElementById('textTable').textContent = currentTextOutput;
+        }
+
+        /**
+         * Export to Excel with proper formatting
+         */
+        function exportToExcel() {
+            // Create a more structured Excel format
+            let excelOutput = '';
+            
+            // Add team headers and members
+            currentTeams.forEach(team => {
+                excelOutput += `Team: ${team.name}\n`;
+                excelOutput += '----------------\n';
+                
+                team.members.forEach((member, index) => {
+                    excelOutput += `${index + 1}. ${member}\n`;
+                });
+                
+                excelOutput += '\n\n'; // Add spacing between teams
+            });
+            
+            // Add summary information
+            excelOutput += `Summary:\n`;
+            excelOutput += `Total Participants: ${currentParticipants.length}\n`;
+            excelOutput += `Total Teams: ${currentTeams.length}\n`;
+            excelOutput += `Average per Team: ${(currentParticipants.length / currentTeams.length).toFixed(1)}`;
+            
+            // Create download link
+            const blob = new Blob([excelOutput], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Teams_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         /**
@@ -984,6 +1171,44 @@
         }
 
         /**
+         * Handle file import
+         */
+        function handleFileImport(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                document.getElementById('participantNames').value = content;
+                
+                // Update file info
+                const fileInfo = document.getElementById('fileInfo');
+                fileInfo.textContent = `Imported: ${file.name} (${file.size} bytes)`;
+                fileInfo.classList.add('show');
+                
+                // Hide validation message if shown
+                hideValidationMessage();
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * Clear all inputs and results
+         */
+        function clearAll() {
+            document.getElementById('participantNames').value = '';
+            document.getElementById('membersPerTeam').value = '6';
+            document.getElementById('fileInfo').textContent = '';
+            document.getElementById('fileInfo').classList.remove('show');
+            document.getElementById('validationMessage').classList.remove('show');
+            
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('show');
+            
+            currentTeams = [];
+            currentParticipants = [];
+            currentTextOutput = '';
+        }
+
+        /**
          * Initialize the application when DOM is loaded
          */
         document.addEventListener('DOMContentLoaded', function() {
@@ -1017,15 +1242,45 @@
                     generateTeams();
                 }
             });
+            
+            // File input handling
+            const fileInput = document.getElementById('fileInput');
+            
+            // Click handler
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileImport(e.target.files[0]);
+                }
+            });
+            
+            // Drag and drop handling
+            const fileInputLabel = document.querySelector('.file-input-label');
+            
+            fileInputLabel.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#4f46e5';
+                this.style.backgroundColor = 'rgba(79, 70, 229, 0.1)';
+            });
+            
+            fileInputLabel.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#e5e7eb';
+                this.style.backgroundColor = 'transparent';
+            });
+            
+            fileInputLabel.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#e5e7eb';
+                this.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileImport(e.dataTransfer.files[0]);
+                }
+            });
         });
 
         // Add input validation for number fields
-        document.getElementById('numTeams').addEventListener('input', function() {
-            const value = parseInt(this.value);
-            if (value < 1) this.value = 1;
-            if (value > 50) this.value = 50;
-        });
-
         document.getElementById('membersPerTeam').addEventListener('input', function() {
             const value = parseInt(this.value);
             if (value < 1) this.value = 1;
