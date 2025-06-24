@@ -6,425 +6,97 @@
     <title>Team Division Tool</title>
     <style>
         /* Reset dan Base Styling */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-            color: #333;
-        }
-
-        /* Container utama */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            padding: 20px;
-            text-align: center;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        /* Form Section */
-        .form-section {
-            padding: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 0.95rem;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .file-input-container {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: inline-block;
-            padding: 12px 20px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            width: 100%;
-            font-size: 0.95rem;
-            color: #666;
-        }
-
-        .file-input-label:hover {
-            background: #e9ecef;
-            border-color: #4facfe;
-        }
-
-        /* Status dan Validasi */
-        .status-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .status-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .status-label {
-            font-weight: 500;
-            color: #666;
-        }
-
-        .status-value {
-            font-weight: 600;
-            color: #333;
-        }
-
-        /* Alert styling */
-        .alert {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Tombol */
-        .btn {
-            display: inline-block;
-            padding: 14px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            text-align: center;
-            min-width: 150px;
-            margin: 5px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(168, 237, 234, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .btn-container {
-            text-align: center;
-            margin: 25px 0;
-        }
-
-        /* Grid Tim - Styling untuk Screenshot */
-        .teams-output {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .teams-title {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .teams-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            max-width: 100%;
-        }
-
-        .team-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            transition: transform 0.2s ease;
-        }
-
-        .team-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .team-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .team-members {
-            list-style: none;
-        }
-
-        .team-members li {
-            padding: 6px 10px;
-            margin-bottom: 4px;
-            background: white;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            border: 1px solid #e9ecef;
-        }
-
-        .team-members li:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Responsif */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .form-section {
-                padding: 20px;
-            }
-            
-            .teams-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 10px;
-            }
-            
-            .team-card {
-                padding: 12px;
-            }
-            
-            .team-header {
-                font-size: 0.8rem;
-                padding: 6px 10px;
-            }
-            
-            .team-members li {
-                font-size: 0.8rem;
-                padding: 5px 8px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .teams-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Loading state */
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-style: italic;
-        }
-
-        /* Hidden class */
-        .hidden {
-            display: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; text-align: center; color: white; }
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 5px; }
+        .header p { font-size: 1rem; opacity: 0.9; }
+        .form-section { padding: 25px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; font-size: 0.95rem; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 2px solid #e1e5e9; border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1); }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .file-input-container { position: relative; display: inline-block; width: 100%; }
+        .file-input { position: absolute; left: -9999px; }
+        .file-input-label { display: inline-block; padding: 12px 20px; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; text-align: center; width: 100%; font-size: 0.95rem; color: #666; }
+        .file-input-label:hover { background: #e9ecef; border-color: #4facfe; }
+        .status-section { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .status-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem; }
+        .status-label { font-weight: 500; color: #666; }
+        .status-value { font-weight: 600; color: #333; }
+        .alert { padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; font-weight: 500; }
+        .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .btn { display: inline-block; padding: 14px 30px; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; text-align: center; min-width: 150px; margin: 5px; }
+        .btn-primary { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        .btn-secondary { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3); }
+        .btn-secondary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(168, 237, 234, 0.3); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        .btn-container { text-align: center; margin: 25px 0; }
+        .teams-output { background: white; padding: 20px; border-radius: 15px; margin-top: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .teams-title { text-align: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: #333; }
+        .teams-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 100%; }
+        .team-card { background: #f8f9fa; border-radius: 12px; padding: 15px; border: 2px solid #e9ecef; transition: transform 0.2s ease; }
+        .team-card:hover { transform: translateY(-2px); }
+        .team-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-align: center; margin-bottom: 10px; }
+        .team-members { list-style: none; }
+        .team-members li { padding: 6px 10px; margin-bottom: 4px; background: white; border-radius: 6px; font-size: 0.85rem; border: 1px solid #e9ecef; }
+        .team-members li:last-child { margin-bottom: 0; }
+        @media (max-width: 768px) { .header h1 { font-size: 1.5rem; } .form-section { padding: 20px; } .teams-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; } .team-card { padding: 12px; } .team-header { font-size: 0.8rem; padding: 6px 10px; } .team-members li { font-size: 0.8rem; padding: 5px 8px; } }
+        @media (max-width: 480px) { .teams-grid { grid-template-columns: repeat(2, 1fr); } }
+        .loading { text-align: center; padding: 20px; color: #666; font-style: italic; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header Section -->
         <div class="header">
             <h1>🏆 Team Division Tool</h1>
             <p>Bagi tim secara adil dan acak dengan mudah</p>
         </div>
-
-        <!-- Form Input Section -->
         <div class="form-section">
-            <!-- Input Anggota per Tim -->
             <div class="form-group">
                 <label for="membersPerTeam">Anggota per Tim:</label>
                 <input type="number" id="membersPerTeam" min="1" max="20" value="6">
             </div>
-
-            <!-- Input Nama Manual -->
             <div class="form-group">
                 <label for="namesList">Daftar Nama (satu nama per baris):</label>
                 <textarea id="namesList" placeholder="Masukkan nama-nama peserta...&#10;Contoh:&#10;Ahmad Budi&#10;Siti Aminah&#10;Dani Pratama"></textarea>
             </div>
-
-            <!-- Input File Opsional -->
             <div class="form-group">
                 <label>Import File (.txt):</label>
                 <div class="file-input-container">
                     <input type="file" id="fileInput" class="file-input" accept=".txt">
-                    <label for="fileInput" class="file-input-label">
-                        📁 Pilih file .txt (opsional)
-                    </label>
+                    <label for="fileInput" class="file-input-label">📁 Pilih file .txt (opsional)</label>
                 </div>
                 <div id="fileName" class="mt-2 text-sm text-gray-600"></div>
             </div>
-
-            <!-- Status dan Preview -->
             <div class="status-section">
-                <div class="status-item">
-                    <span class="status-label">Total Nama:</span>
-                    <span class="status-value" id="totalNames">0</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Tim yang Dibutuhkan:</span>
-                    <span class="status-value" id="teamsNeeded">0</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Status:</span>
-                    <span class="status-value" id="validationStatus">Siap untuk input</span>
-                </div>
+                <div class="status-item"><span class="status-label">Total Nama:</span><span class="status-value" id="totalNames">0</span></div>
+                <div class="status-item"><span class="status-label">Tim yang Dibutuhkan:</span><span class="status-value" id="teamsNeeded">0</span></div>
+                <div class="status-item"><span class="status-label">Status:</span><span class="status-value" id="validationStatus">Siap untuk input</span></div>
             </div>
-
-            <!-- Alert Messages -->
             <div id="alertContainer"></div>
-
-            <!-- Tombol Generate -->
-            <div class="btn-container">
-                <button id="generateBtn" class="btn btn-primary" disabled>
-                    🎲 Generate Tim
-                </button>
-            </div>
+            <div class="btn-container"><button id="generateBtn" class="btn btn-primary" disabled>🎲 Generate Tim</button></div>
         </div>
-
-        <!-- Output Section -->
         <div id="teamsOutput" class="teams-output hidden">
             <h2 class="teams-title">📋 Hasil Pembagian Tim</h2>
-            
-            <!-- Generation Info Section -->
             <div id="generationInfo" class="generation-info hidden">
-                <h3>📊 Informasi Generate:</h3>
-                <div id="generationDetails"></div>
+                <h3>📊 Informasi Generate:</h3><div id="generationDetails"></div>
             </div>
-            
-            <!-- Export Button -->
-            <div class="btn-container">
-                <button id="exportBtn" class="btn btn-secondary hidden">
-                    📄 Export ke TXT
-                </button>
-            </div>
-            
+            <div class="btn-container"><button id="exportBtn" class="btn btn-secondary hidden">📄 Export ke TXT</button></div>
             <div id="teamsGrid" class="teams-grid"></div>
         </div>
     </div>
-
     <script>
-        // Global variables untuk menyimpan state aplikasi
         let currentNames = [];
-        let currentTeams = []; // Menyimpan hasil generate tim
-        let generationStats = {}; // Menyimpan statistik generate terakhir
-        let validationState = {
-            isValid: false,
-            errors: [],
-            warnings: []
-        };
+        let currentTeams = [];
+        let generationStats = {};
+        let validationState = { isValid: false, errors: [], warnings: [] };
 
-        // DOM Elements - Mengambil referensi elemen-elemen penting
         const membersPerTeamInput = document.getElementById('membersPerTeam');
         const namesListTextarea = document.getElementById('namesList');
         const fileInput = document.getElementById('fileInput');
@@ -440,455 +112,114 @@
         const generationDetails = document.getElementById('generationDetails');
         const exportBtn = document.getElementById('exportBtn');
 
-        // Event listeners - Mendengarkan perubahan input
         membersPerTeamInput.addEventListener('input', updateValidation);
         namesListTextarea.addEventListener('input', updateValidation);
         fileInput.addEventListener('change', handleFileInput);
         generateBtn.addEventListener('click', generateTeams);
         exportBtn.addEventListener('click', exportToTxt);
 
-        /**
-         * Menangani input file .txt
-         * Membaca konten file dan memasukkannya ke textarea
-         */
         function handleFileInput(event) {
             const file = event.target.files[0];
-            if (!file) {
-                fileName.textContent = '';
-                return;
-            }
-
-            // Validasi tipe file
+            if (!file) { fileName.textContent = ''; return; }
             if (!file.name.toLowerCase().endsWith('.txt')) {
-                showAlert('File harus berformat .txt', 'danger');
-                fileInput.value = '';
-                fileName.textContent = '';
-                return;
+                showAlert('File harus berformat .txt', 'danger'); fileInput.value = ''; fileName.textContent = ''; return;
             }
-
             fileName.textContent = `📄 ${file.name}`;
-
-            // Membaca konten file
-            const reader = new FileReader();
-            reader.onload = function(e) {
+            const reader = new FileReader(); reader.onload = function(e) {
                 const content = e.target.result;
-                // Menambahkan konten ke textarea yang sudah ada
                 const currentContent = namesListTextarea.value.trim();
-                if (currentContent) {
-                    namesListTextarea.value = currentContent + '\n' + content;
-                } else {
-                    namesListTextarea.value = content;
-                }
+                namesListTextarea.value = currentContent ? (currentContent + '\n' + content) : content;
                 updateValidation();
             };
             reader.readAsText(file);
         }
 
-        /**
-         * Menampilkan pesan alert
-         * @param {string} message - Pesan yang akan ditampilkan
-         * @param {string} type - Tipe alert ('warning' atau 'danger')
-         */
-        function showAlert(message, type = 'warning') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            alertContainer.appendChild(alertDiv);
-        }
+        function showAlert(message, type = 'warning') { const alertDiv = document.createElement('div'); alertDiv.className = `alert alert-${type}`; alertDiv.textContent = message; alertContainer.appendChild(alertDiv); }
+        function clearAlerts() { alertContainer.innerHTML = ''; }
+        function processNames(text) { return text.split('\n').map(n => n.trim()).filter(n => n); }
+        function findDuplicates(names) { const seen = new Set(), dups = new Set(); names.forEach(n => { const l = n.toLowerCase(); if (seen.has(l)) dups.add(n); else seen.add(l); }); return Array.from(dups); }
 
-        /**
-         * Membersihkan semua pesan alert
-         */
-        function clearAlerts() {
-            alertContainer.innerHTML = '';
-        }
-
-        /**
-         * Memproses daftar nama dari textarea
-         * Membersihkan whitespace dan menghilangkan nama kosong
-         * @param {string} text - Teks dari textarea
-         * @returns {Array} - Array nama yang sudah dibersihkan
-         */
-        function processNames(text) {
-            return text
-                .split('\n')
-                .map(name => name.trim())
-                .filter(name => name.length > 0);
-        }
-
-        /**
-         * Mencari nama duplikat dalam array
-         * @param {Array} names - Array nama
-         * @returns {Array} - Array nama yang duplikat
-         */
-        function findDuplicates(names) {
-            const seen = new Set();
-            const duplicates = new Set();
-            
-            names.forEach(name => {
-                const lowerName = name.toLowerCase();
-                if (seen.has(lowerName)) {
-                    duplicates.add(name);
-                } else {
-                    seen.add(lowerName);
-                }
-            });
-            
-            return Array.from(duplicates);
-        }
-
-        /**
-         * Memvalidasi input dan memperbarui UI
-         * Fungsi utama untuk validasi yang dipanggil setiap ada perubahan input
-         */
         function updateValidation() {
             clearAlerts();
-            
             const membersPerTeam = parseInt(membersPerTeamInput.value) || 0;
-            const namesText = namesListTextarea.value.trim();
-            
-            // Reset state
-            validationState = {
-                isValid: false,
-                errors: [],
-                warnings: []
-            };
-
-            // Validasi anggota per tim
-            if (membersPerTeam < 1) {
-                validationState.errors.push('Anggota per tim minimal 1');
-            }
-            if (membersPerTeam > 20) {
-                validationState.errors.push('Anggota per tim maksimal 20');
-            }
-
-            // Proses nama
-            currentNames = processNames(namesText);
+            validationState = { isValid: false, errors: [], warnings: [] };
+            if (membersPerTeam < 1) validationState.errors.push('Anggota per tim minimal 1');
+            if (membersPerTeam > 20) validationState.errors.push('Anggota per tim maksimal 20');
+            currentNames = processNames(namesListTextarea.value.trim());
             const totalNames = currentNames.length;
-
-            // Update tampilan jumlah nama
             totalNamesSpan.textContent = totalNames;
-
-            // Validasi jumlah nama
-            if (totalNames === 0) {
-                validationState.errors.push('Masukkan minimal 1 nama');
-                teamsNeededSpan.textContent = '0';
-            } else if (totalNames > 1000) {
-                validationState.errors.push('Maksimal 1000 nama');
-            } else {
-                // Hitung jumlah tim yang dibutuhkan
-                const teamsNeeded = Math.ceil(totalNames / membersPerTeam);
-                teamsNeededSpan.textContent = teamsNeeded;
-                
-                // Cek duplikat
-                const duplicates = findDuplicates(currentNames);
-                if (duplicates.length > 0) {
-                    validationState.errors.push(`Nama duplikat ditemukan: ${duplicates.join(', ')}`);
-                }
-            }
-
-            // Update status validasi
-            if (validationState.errors.length === 0) {
-                validationState.isValid = true;
-                validationStatusSpan.textContent = '✅ Siap generate';
-                validationStatusSpan.style.color = '#28a745';
-            } else {
-                validationStatusSpan.textContent = '❌ Ada masalah';
-                validationStatusSpan.style.color = '#dc3545';
-            }
-
-            // Tampilkan error messages
-            validationState.errors.forEach(error => {
-                showAlert(error, 'danger');
-            });
-
-            // Enable/disable tombol generate
+            if (totalNames === 0) { validationState.errors.push('Masukkan minimal 1 nama'); teamsNeededSpan.textContent = '0'; }
+            else if (totalNames > 1000) validationState.errors.push('Maksimal 1000 nama');
+            else { const needed = Math.ceil(totalNames / membersPerTeam); teamsNeededSpan.textContent = needed; const dup = findDuplicates(currentNames); if (dup.length) validationState.errors.push(`Nama duplikat ditemukan: ${dup.join(', ')}`); }
+            if (!validationState.errors.length) { validationState.isValid = true; validationStatusSpan.textContent = '✅ Siap generate'; validationStatusSpan.style.color = '#28a745'; }
+            else { validationStatusSpan.textContent = '❌ Ada masalah'; validationStatusSpan.style.color = '#dc3545'; }
+            validationState.errors.forEach(e => showAlert(e, 'danger'));
             generateBtn.disabled = !validationState.isValid;
         }
 
-        /**
-         * Mengacak array menggunakan algoritma Fisher-Yates yang diperkuat
-         * Algoritma ini memastikan distribusi yang benar-benar acak dengan menukar 
-         * setiap elemen dengan elemen lain secara backward iteration
-         * @param {Array} array - Array yang akan diacak
-         * @returns {Array} - Array yang sudah diacak dengan maksimal randomness
-         */
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            // Lakukan shuffling berkali-kali untuk memastikan pengacakan maksimal
-            // Terutama penting ketika nama diurutkan berdasarkan lokasi geografis
-            for (let round = 0; round < 3; round++) {
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-            }
-            return shuffled;
-        }
+        function shuffleArray(arr) { const s = [...arr]; for (let r=0; r<3; r++) for (let i=s.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [s[i],s[j]]=[s[j],s[i]]; } return s; }
 
-        /**
-         * Membagi nama ke dalam tim dengan algoritma balanced distribution
-         * Sistem ini memastikan setiap tim memiliki minimal sesuai permintaan,
-         * dan kelebihan nama didistribusikan secara acak ke tim-tim lain
-         * 
-         * Algoritma:
-         * 1. Shuffle nama untuk menghindari clustering geografis
-         * 2. Hitung berapa tim yang diperlukan berdasarkan anggota per tim yang diminta
-         * 3. Isi setiap tim dengan jumlah minimum yang diminta
-         * 4. Distribusikan sisa nama secara acak ke tim-tim yang sudah ada
-         */
         function divideIntoTeams() {
-            const membersPerTeam = parseInt(membersPerTeamInput.value);
-            const totalNames = currentNames.length;
-            
-            // Langkah 1: Shuffle nama secara maksimal untuk menghindari clustering
-            const shuffledNames = shuffleArray(currentNames);
-            
-            // Langkah 2: Hitung distribusi optimal
-            const baseTeamsNeeded = Math.floor(totalNames / membersPerTeam);
-            const remainderMembers = totalNames % membersPerTeam;
-            
-            // Jika remainder terlalu kecil untuk jadi tim sendiri, gabungkan ke tim lain
-            let numTeams, distribution;
-            if (remainderMembers === 0) {
-                // Pembagian pas, tidak ada sisa
-                numTeams = baseTeamsNeeded;
-                distribution = { base: membersPerTeam, extras: 0 };
-            } else if (remainderMembers < Math.ceil(membersPerTeam / 2)) {
-                // Sisa sedikit, distribusikan ke tim yang ada
-                numTeams = baseTeamsNeeded;
-                distribution = { base: membersPerTeam, extras: remainderMembers };
-            } else {
-                // Sisa cukup banyak, buat tim baru dengan sisa tersebut
-                numTeams = baseTeamsNeeded + 1;
-                distribution = { base: membersPerTeam, extras: 0 };
+            const perTeam = parseInt(membersPerTeamInput.value);
+            const total = currentNames.length;
+            const shuffled = shuffleArray(currentNames);
+            const base = Math.floor(total / perTeam);
+            const rem = total % perTeam;
+            let numTeams = (rem === 0) ? base : (rem < Math.ceil(perTeam/2) ? base : base+1);
+            const teams = Array.from({ length: numTeams }, ()=>[]);
+            let idx=0;
+            for (let t=0; t<numTeams; t++) {
+                const count = (t===numTeams-1 && rem>0 && numTeams===base+1)?rem:perTeam;
+                for (let m=0; m<count && idx<total; m++) teams[t].push(shuffled[idx++]);
             }
-            
-            // Langkah 3: Inisialisasi tim dan isi dengan anggota minimum
-            const teams = Array.from({ length: numTeams }, () => []);
-            let nameIndex = 0;
-            
-            // Isi setiap tim dengan jumlah anggota yang diminta
-            for (let teamIndex = 0; teamIndex < numTeams; teamIndex++) {
-                const membersToAdd = (teamIndex === numTeams - 1 && remainderMembers > 0 && numTeams === baseTeamsNeeded + 1) 
-                    ? remainderMembers 
-                    : membersPerTeam;
-                    
-                for (let memberCount = 0; memberCount < membersToAdd && nameIndex < totalNames; memberCount++) {
-                    teams[teamIndex].push(shuffledNames[nameIndex]);
-                    nameIndex++;
-                }
-            }
-            
-            // Langkah 4: Distribusikan sisa nama secara acak jika masih ada
-            if (nameIndex < totalNames) {
-                const remainingNames = shuffledNames.slice(nameIndex);
-                const shuffledTeamIndices = shuffleArray([...Array(numTeams).keys()]);
-                
-                remainingNames.forEach((name, index) => {
-                    const targetTeamIndex = shuffledTeamIndices[index % numTeams];
-                    teams[targetTeamIndex].push(name);
-                });
-            }
-            
-            // Simpan statistik untuk ditampilkan
-            generationStats = {
-                totalNames: totalNames,
-                requestedPerTeam: membersPerTeam,
-                numTeams: numTeams,
-                teamSizes: teams.map(team => team.length),
-                minSize: Math.min(...teams.map(team => team.length)),
-                maxSize: Math.max(...teams.map(team => team.length)),
-                distributionMethod: remainderMembers === 0 ? 'perfect' : 
-                                  (remainderMembers < Math.ceil(membersPerTeam / 2) ? 'distributed' : 'new_team')
-            };
-            
+            if (idx<total) { const remNames = shuffled.slice(idx); const tIdx = shuffleArray([...Array(numTeams).keys()]); remNames.forEach((n,i)=>teams[tIdx[i%numTeams]].push(n)); }
+            generationStats = { totalNames: total, requestedPerTeam: perTeam, numTeams, teamSizes: teams.map(t=>t.length), minSize: Math.min(...teams.map(t=>t.length)), maxSize: Math.max(...teams.map(t=>t.length)), distributionMethod: rem===0?'perfect':(rem<Math.ceil(perTeam/2)?'distributed':'new_team') };
             return teams;
         }
 
-        /**
-         * Menampilkan informasi tentang proses generate yang baru dilakukan
-         * Memberikan transparency kepada user tentang bagaimana pembagian dilakukan
-         */
         function displayGenerationInfo() {
-            const stats = generationStats;
-            let infoHTML = '';
-            
-            // Informasi dasar
-            infoHTML += `<p><strong>Total peserta:</strong> ${stats.totalNames} nama</p>`;
-            infoHTML += `<p><strong>Permintaan:</strong> ${stats.requestedPerTeam} orang per tim</p>`;
-            infoHTML += `<p><strong>Hasil:</strong> ${stats.numTeams} tim terbentuk</p>`;
-            
-            // Detail ukuran tim
-            const teamSizeDistribution = {};
-            stats.teamSizes.forEach(size => {
-                teamSizeDistribution[size] = (teamSizeDistribution[size] || 0) + 1;
-            });
-            
-            let sizeDetails = [];
-            Object.keys(teamSizeDistribution).sort((a, b) => a - b).forEach(size => {
-                const count = teamSizeDistribution[size];
-                sizeDetails.push(`${count} tim dengan ${size} anggota`);
-            });
-            infoHTML += `<p><strong>Distribusi:</strong> ${sizeDetails.join(', ')}</p>`;
-            
-            // Penjelasan metode
-            let methodExplanation = '';
-            if (stats.distributionMethod === 'perfect') {
-                methodExplanation = 'Pembagian sempurna - semua tim memiliki jumlah anggota yang sama persis.';
-            } else if (stats.distributionMethod === 'distributed') {
-                const extraMembers = stats.totalNames % stats.requestedPerTeam;
-                methodExplanation = `${extraMembers} anggota sisa didistribusikan secara acak ke tim-tim yang sudah ada untuk menjaga keseimbangan.`;
-            } else {
-                methodExplanation = 'Sisa anggota cukup untuk membentuk tim terpisah.';
-            }
-            infoHTML += `<p><strong>Metode:</strong> ${methodExplanation}</p>`;
-            
-            // Informasi pengacakan
-            infoHTML += `<p><strong>Pengacakan:</strong> Nama-nama diacak berkali-kali untuk memastikan pembauran maksimal dan menghindari pengelompokan berdasarkan urutan asli.</p>`;
-            
-            generationDetails.innerHTML = infoHTML;
-            generationInfo.classList.remove('hidden');
+            const s=generationStats; let html=`<p><strong>Total peserta:</strong> ${s.totalNames} nama</p><p><strong>Permintaan:</strong> ${s.requestedPerTeam} orang per tim</p><p><strong>Hasil:</strong> ${s.numTeams} tim terbentuk</p>`;
+            const dist={}; s.teamSizes.forEach(sz=>dist[sz]=(dist[sz]||0)+1);
+            const details=Object.keys(dist).sort((a,b)=>a-b).map(sz=>`${dist[sz]} tim dengan ${sz} anggota`);
+            html+=`<p><strong>Distribusi:</strong> ${details.join(', ')}</p>`;
+            let method=''; if (s.distributionMethod==='perfect') method='Pembagian sempurna - semua tim memiliki jumlah anggota yang sama persis.';
+            else if (s.distributionMethod==='distributed') method=`${s.totalNames% s.requestedPerTeam} anggota sisa didistribusikan secara acak ke tim-tim yang sudah ada untuk menjaga keseimbangan.`;
+            else method='Sisa anggota cukup untuk membentuk tim terpisah.';
+            html+=`<p><strong>Metode:</strong> ${method}</p><p><strong>Pengacakan:</strong> Nama-nama diacak berkali-kali untuk memastikan pembauran maksimal dan menghindari pengelompokan berdasarkan urutan asli.</p>`;
+            generationDetails.innerHTML=html; generationInfo.classList.remove('hidden');
         }
 
-        /**
-         * Export hasil pembagian tim ke file TXT
-         * Format: Tim [nomor] sebagai header, diikuti nama-nama anggota
-         * Setiap tim dipisahkan dengan baris kosong untuk kemudahan text-to-column
-         */
         function exportToTxt() {
-            if (!currentTeams || currentTeams.length === 0) {
-                showAlert('Tidak ada data tim untuk diekspor', 'danger');
-                return;
-            }
-            
-            let txtContent = '';
-            const timestamp = new Date().toLocaleString('id-ID');
-            
-            // Header file
-            txtContent += `Hasil Pembagian Tim\n`;
-            txtContent += `Generated: ${timestamp}\n`;
-            txtContent += `Total Peserta: ${generationStats.totalNames}\n`;
-            txtContent += `Permintaan: ${generationStats.requestedPerTeam} orang per tim\n`;
-            txtContent += `Total Tim: ${generationStats.numTeams}\n`;
-            txtContent += `\n${'='.repeat(50)}\n\n`;
-            
-            // Data tim
-            currentTeams.forEach((team, index) => {
-                txtContent += `Tim ${index + 1}\n`;
-                txtContent += `-`.repeat(10) + `\n`;
-                team.forEach(member => {
-                    txtContent += `${member}\n`;
-                });
-                txtContent += `\n`; // Baris kosong sebagai pemisah
-            });
-            
-            // Footer dengan statistik
-            txtContent += `${'='.repeat(50)}\n`;
-            txtContent += `Statistik:\n`;
-            txtContent += `- Tim terkecil: ${generationStats.minSize} anggota\n`;
-            txtContent += `- Tim terbesar: ${generationStats.maxSize} anggota\n`;
-            txtContent += `- Selisih maksimal: ${generationStats.maxSize - generationStats.minSize} anggota\n`;
-            
-            // Create dan download file
-            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            
-            const fileName = `pembagian-tim-${new Date().toISOString().split('T')[0]}.txt`;
-            link.href = url;
-            link.download = fileName;
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            showAlert(`✅ File "${fileName}" berhasil diunduh`, 'warning');
+            if (!currentTeams.length) { showAlert('Tidak ada data tim untuk diekspor','danger'); return; }
+            let txt=`Hasil Pembagian Tim\nGenerated: ${new Date().toLocaleString('id-ID')}\nTotal Peserta: ${generationStats.totalNames}\nPermintaan: ${generationStats.requestedPerTeam} orang per tim\nTotal Tim: ${generationStats.numTeams}\n\n${'='.repeat(50)}\n\n`;
+            currentTeams.forEach((t,i)=>{ txt+=`Tim ${i+1}\n${'-'.repeat(10)}\n`; t.forEach(n=>txt+=`${n}\n`); txt+='\n'; });
+            txt+=`${'='.repeat(50)}\nStatistik:\n- Tim terkecil: ${generationStats.minSize} anggota\n- Tim terbesar: ${generationStats.maxSize} anggota\n- Selisih maksimal: ${generationStats.maxSize-generationStats.minSize} anggota`;
+            const blob=new Blob([txt],{type:'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download=`pembagian-tim-${new Date().toISOString().split('T')[0]}.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+            showAlert(`✅ File "${link.download}" berhasil diunduh`,'warning');
         }
-        /**
-         * Menampilkan hasil pembagian tim dalam bentuk grid
-         * @param {Array} teams - Array berisi tim-tim
-         */
+
         function displayTeams(teams) {
-            // Simpan hasil untuk export
             currentTeams = teams;
-            
             teamsGrid.innerHTML = '';
-            
-            teams.forEach((team, index) => {
-                const teamCard = document.createElement('div');
-                teamCard.className = 'team-card';
-                
-                const teamHeader = document.createElement('div');
-                teamHeader.className = 'team-header';
-                teamHeader.textContent = `Tim ${index + 1} (${team.length} orang)`;
-                
-                const membersList = document.createElement('ul');
-                membersList.className = 'team-members';
-                
-                team.forEach(member => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = member;
-                    membersList.appendChild(listItem);
-                });
-                
-                teamCard.appendChild(teamHeader);
-                teamCard.appendChild(membersList);
-                teamsGrid.appendChild(teamCard);
+            teams.forEach((team, i) => {
+                const card = document.createElement('div'); card.className = 'team-card';
+                const header = document.createElement('div'); header.className = 'team-header'; header.textContent = `Tim ${i+1}`;
+                const list = document.createElement('ul'); list.className = 'team-members';
+                team.forEach(member => { const li = document.createElement('li'); li.textContent = member; list.appendChild(li); });
+                card.appendChild(header); card.appendChild(list); teamsGrid.appendChild(card);
             });
-            
-            // Tampilkan informasi generate
-            displayGenerationInfo();
-            
-            // Tampilkan section output dan tombol export
-            teamsOutput.classList.remove('hidden');
-            exportBtn.classList.remove('hidden');
-            
-            // Scroll ke hasil
-            teamsOutput.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
+            displayGenerationInfo(); teamsOutput.classList.remove('hidden'); exportBtn.classList.remove('hidden'); teamsOutput.scrollIntoView({behavior:'smooth',block:'start'});
         }
 
-        /**
-         * Fungsi utama untuk generate tim
-         * Dipanggil ketika tombol Generate diklik
-         */
         function generateTeams() {
-            if (!validationState.isValid) {
-                showAlert('Perbaiki error terlebih dahulu', 'danger');
-                return;
-            }
-
-            // Tampilkan loading state
-            generateBtn.textContent = '🔄 Generating...';
-            generateBtn.disabled = true;
-            
-            // Simulasi delay untuk UX yang lebih baik
+            if (!validationState.isValid) { showAlert('Perbaiki error terlebih dahulu','danger'); return; }
+            generateBtn.textContent = '🔄 Generating...'; generateBtn.disabled = true;
             setTimeout(() => {
-                try {
-                    const teams = divideIntoTeams();
-                    displayTeams(teams);
-                    
-                    // Berikan feedback sukses
-                    clearAlerts();
-                    showAlert(`✅ Berhasil membagi ${currentNames.length} nama ke dalam ${teams.length} tim`, 'warning');
-                    
-                } catch (error) {
-                    console.error('Error generating teams:', error);
-                    showAlert('Terjadi kesalahan saat membagi tim. Silakan coba lagi.', 'danger');
-                } finally {
-                    // Reset tombol
-                    generateBtn.textContent = '🎲 Generate Tim';
-                    generateBtn.disabled = false;
-                }
+                try { const teams = divideIntoTeams(); displayTeams(teams); clearAlerts(); showAlert(`✅ Berhasil membagi ${currentNames.length} nama ke dalam ${teams.length} tim`,'warning'); }
+                catch (e) { console.error(e); showAlert('Terjadi kesalahan saat membagi tim. Silakan coba lagi.','danger'); }
+                finally { generateBtn.textContent = '🎲 Generate Tim'; generateBtn.disabled = false; }
             }, 500);
         }
-
-        // Inisialisasi awal - Jalankan validasi pertama kali
         updateValidation();
     </script>
 </body>
